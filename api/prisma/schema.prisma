@@ -14,7 +14,19 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  password String   @unique
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  media    Media[]
+}
+
+/**
+ * Media can be either a photo or a video.
+ * This is a pointer record to the object in cloud storage (S3).
+ * Media always belongs to a user.
+ */
+model Media {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
