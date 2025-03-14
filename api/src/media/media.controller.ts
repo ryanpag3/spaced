@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreateMediaDto } from './dto/CreateMediaDto';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @Controller({
     path: 'media',
@@ -7,7 +8,7 @@ import { CreateMediaDto } from './dto/CreateMediaDto';
 })
 export class MediaController {
     @Post()
-    create(@Body() createMediaDto: CreateMediaDto) {
+    create(@Req() request: Request) {
         return 'TODO: implement create';
     }
 
