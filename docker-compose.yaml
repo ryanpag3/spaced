@@ -17,3 +17,14 @@ services:
       - POSTGRES_USER=spaced
       - POSTGRES_PASSWORD=spaced
       - POSTGRES_DB=spaced
+  s3:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-west-2
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
