@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@aws-sdk/lib-storage": "^3.758.0",
+    "@spaced/crypto": "*",
     "axios": "^1.8.3",
     "commander": "^13.1.0",
     "ts-node": "^10.9.2",

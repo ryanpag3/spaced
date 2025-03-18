@@ -1,8 +1,11 @@
 import axios from '../lib/axios';
-import { encryptFile } from '../lib/crypto';
+import fs from 'fs/promises';
+import Crypto from '@spaced/crypto';
 
 export async function uploadMedia(path: string) {
-    const { buffer, FEK, algorithm } = await encryptFile(path);
+    const fileBuffer = await fs.readFile(path);
+
+    const { buffer, FEK, algorithm, encoding } = await Crypto.symmetricEncrypt(fileBuffer);
 
     const contentLength = buffer.byteLength.toString();
 
@@ -14,6 +17,7 @@ export async function uploadMedia(path: string) {
             'X-Encryption-Key': FEK.key.toString('base64'),
             'X-Encryption-IV': FEK.iv.toString('base64'),
             'X-Encryption-Algorithm': algorithm,
+            'X-Encryption-Encoding': encoding,
             'Content-Length': contentLength
         }
     })
