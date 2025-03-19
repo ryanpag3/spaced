@@ -1,7 +1,7 @@
-import { CreateBucketCommand, DeleteObjectCommand, DeleteObjectCommandOutput, HeadBucketCommand, PutObjectCommandOutput, S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, DeleteObjectCommand, DeleteObjectCommandOutput, GetObjectCommand, HeadBucketCommand, PutObjectCommandOutput, S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import { Injectable } from '@nestjs/common';
-import { PassThrough } from 'stream';
+import { Injectable, Logger } from '@nestjs/common';
+import { PassThrough, Readable } from 'stream';
 
 @Injectable()
 export class S3Service {
@@ -55,11 +55,24 @@ export class S3Service {
         });
 
         parallelUpload.on('httpUploadProgress', (progress) => {
-            console.log(`Uploaded ${progress.loaded} of ${progress.total} bytes`);
+            Logger.log(`Uploaded ${progress.loaded} of ${progress.total} bytes for key ${key}`);
         });
 
         const result = await parallelUpload.done();
         return result;
+    }
+
+    async download(key: string): Promise<{
+        body: Readable,
+        contentType: string
+    }> {
+        const command = new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+        });
+        const { Body, ContentType } = await this.client.send(command);
+        const body = Body as Readable;
+        return { body, contentType: ContentType };
     }
 
 

@@ -2,13 +2,13 @@ import crypto from 'crypto';
 
 const DEFAULT_SYMMETRIC_ALGORITHM = 'aes-256-cbc';
 
+// TODO: this needs to be converted to using streaming due to large file sizes
 const symmetricEncrypt = async (
     data: Buffer,
     key?: Buffer,
     options?: {
         algorithm?: string,
-        iv?: Buffer,
-        encoding?: BufferEncoding
+        iv?: Buffer
     }
 ): Promise<{
     buffer: Buffer,
@@ -16,14 +16,12 @@ const symmetricEncrypt = async (
         key: Buffer,
         iv: Buffer
     },
-    algorithm: string,
-    encoding: string
+    algorithm: string
 }> => {
     const algorithm = options?.algorithm || DEFAULT_SYMMETRIC_ALGORITHM;
     const iv = options?.iv || crypto.randomBytes(16);
-    const encoding = options?.encoding || 'base64';
     const encryptionKey = key || crypto.randomBytes(32);
-    const cipher = crypto.createCipheriv(algorithm, encryptionKey, iv, { encoding });
+    const cipher = crypto.createCipheriv(algorithm, encryptionKey, iv);
     const encryptedBuffer = Buffer.concat([cipher.update(data), cipher.final()]);
     return {
         buffer: encryptedBuffer,
@@ -31,8 +29,7 @@ const symmetricEncrypt = async (
             key: encryptionKey,
             iv
         },
-        algorithm,
-        encoding
+        algorithm
     }
 };
 
@@ -48,7 +45,7 @@ const symmetricDecrypt = async (
     const algorithm = options?.algorithm || DEFAULT_SYMMETRIC_ALGORITHM;
     const iv = options?.iv || crypto.randomBytes(16);
     const encoding = options?.encoding || 'base64';
-    const decipher = crypto.createDecipheriv(algorithm, key, iv, { encoding });
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
     const decryptedBuffer = Buffer.concat([decipher.update(data), decipher.final()]);
     return decryptedBuffer;
 }

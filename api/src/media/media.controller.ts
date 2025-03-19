@@ -1,8 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
-import { Base64Encode } from 'base64-stream';
+import { Controller, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { S3Service } from 'src/s3/s3.service';
-import { PassThrough, Transform } from 'stream';
+import { MediaService } from './media.service';
 
 
 @Controller({
@@ -10,44 +8,22 @@ import { PassThrough, Transform } from 'stream';
     version: 'v1beta1'
 })
 export class MediaController {
-    private readonly s3Service: S3Service;
+    private readonly mediaService: MediaService;
 
-    constructor(s3Service: S3Service) {
-        this.s3Service = s3Service;
+    constructor(mediaService: MediaService) {
+        this.mediaService = mediaService;
     }
 
     @Post()
     async upload(@Req() request: Request) {
-        const jsonStream = new PassThrough();
-        const jsonPrefix = `{"key": "${request.headers['x-encryption-key']}","iv": "${request.headers['x-encryption-iv']}","algorithm": "${request.headers['x-encryption-algorithm']}","data": "`;
-        const jsonSuffix = '"}';
-        jsonStream.write(jsonPrefix);
-        const base64Stream = new Base64Encode();
-        request.pipe(base64Stream);
-        base64Stream.on('end', () => {
-            jsonStream.end(jsonSuffix);
-        });
-        base64Stream.pipe(jsonStream, { end: false });
-        await this.s3Service.upload(jsonStream, 'test');
+        const headers = this.mediaService.parseHeaders(request.headers);
+        const res = await this.mediaService.upload(
+            headers.key,
+            headers.iv,
+            headers.algorithm,
+            request
+        );
+        return res;
     }
 
-    @Get()
-    findAll() {
-        return 'TODO: implement findAll';
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return 'TODO: implement findOne';
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateMediaDto: any) {
-        return 'TODO: implement update';
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return 'TODO: implement remove';
-    }
 }
