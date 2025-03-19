@@ -1,5 +1,5 @@
-import { Controller, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { MediaService } from './media.service';
 
 
@@ -24,6 +24,17 @@ export class MediaController {
             request
         );
         return res;
+    }
+
+    @Get("/:id")
+    async download(@Req() request: Request, @Res() response: Response) {
+        const id = request.params.id;
+        const { data, key, iv, algorithm } = await this.mediaService.download(id);
+        data.body.pipe(response);
+        response.setHeader('x-encryption-key', key);
+        response.setHeader('x-encryption-iv', iv);
+        response.setHeader('x-encryption-algorithm', algorithm);
+        return response;
     }
 
 }

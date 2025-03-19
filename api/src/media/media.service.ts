@@ -21,7 +21,6 @@ export class MediaService {
         algorithm: string,
         data: Readable
     ) {
-
         // store metadata
         const response = await prisma.media.create({
             data: {
@@ -57,6 +56,26 @@ export class MediaService {
             throw new HttpException(`Missing required header: ${name}`, 400);
         }
         return value;
+    }
+
+    async download(id: string) {
+        const media = await prisma.media.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if (!media) {
+            throw new HttpException('Media not found', 404);
+        }
+
+        const data = await this.s3Service.download(id);
+        return {
+            data,
+            key: media.encryptionKey,
+            iv: media.iv,
+            algorithm: media.algorithm
+        }
     }
 
 }
