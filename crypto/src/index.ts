@@ -44,7 +44,6 @@ const symmetricDecrypt = async (
 ): Promise<string | Buffer> => {
     const algorithm = options?.algorithm || DEFAULT_SYMMETRIC_ALGORITHM;
     const iv = options?.iv || crypto.randomBytes(16);
-    const encoding = options?.encoding || 'base64';
     const decipher = crypto.createDecipheriv(algorithm, key, iv);
     const decryptedBuffer = Buffer.concat([decipher.update(data), decipher.final()]);
     return decryptedBuffer;

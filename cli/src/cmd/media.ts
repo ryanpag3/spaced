@@ -24,12 +24,27 @@ export async function uploadMedia(path: string) {
     console.log(response);
 }
 
-export async function downloadMedia(key: string) {
+export async function downloadMedia(key: string, filename: string) {
     const response = await axios.get(`/media/${key}`, {
-        responseType: 'arraybuffer'
+        responseType: 'stream'
     });
 
-    // const { buffer, FEK, algorithm, encoding } = await Crypto.symmetricDecrypt(response.data);
+    console.log(response.headers);
 
-    // await fs.writeFile(key, buffer);
+    const encryptionKey = Buffer.from(response.headers['x-encryption-key'], 'base64');
+    const iv = Buffer.from(response.headers['x-encryption-iv'], 'base64');
+    const algorithm = response.headers['x-encryption-algorithm'];
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of response.data) {
+        chunks.push(chunk);
+    }
+    const data = Buffer.concat(chunks);
+
+    const fileBuffer = await Crypto.symmetricDecrypt(data, encryptionKey, {
+        iv,
+        algorithm
+    });
+
+    await fs.writeFile(filename, fileBuffer);
 }
