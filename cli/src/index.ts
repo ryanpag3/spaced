@@ -1,32 +1,81 @@
-#!/usr/bin/env node
-
-import { program } from "commander";
-import initialize from './cmd/init';
-import runCommand from './lib/command';
-import { downloadMedia, uploadMedia } from './cmd/media';
+import { program } from 'commander';
 
 program
-    .name("spaced")
-    .description("CLI tool for interfacing with Spaced API.")
-    .version("v1beta1");
+    .name('spd')
+    .description('Interface with Spaced API endpoints.')
+    .version('v1beta1');
 
-program.command("init")
-    .description("Initialize Spaced CLI.")
-    // we don't wrap init inside runCommand as it is the first command to be run
-    .action(async () => initialize());
 
-const media = program.command("media")
-    .description("CRUD operations for media.");
+/* Authentication */
+program.command('login')
+    .argument('<email>', 'Email address.')
+    .argument('<password>', 'Password.')
+    .description('Login to Spaced API.')
+    .action((email, password) => console.log(`Logging in as ${email}...`));
 
-media.command("upload")
-    .description("CRUD operations for media.")
-    .requiredOption("-p, --path <path>", "Path to media file.")
-    .action((options) => runCommand(async () => uploadMedia(options.path)));
+program.command('logout')
+    .description('Logout of Spaced API.')
+    .action(() => console.log('Logging out...'));
 
-media.command("download")
-    .description("Download media.")
-    .requiredOption("--id <id>", "Unique ID of the media.")
-    .requiredOption("--dest <dest>", "Name of the file to write to.")
-    .action((options) => runCommand(async () => downloadMedia(options.id, options.dest)));
+/* Library */
+program.command('upload')
+    .argument('<path>', 'Path to media file or folder.')
+    .description('Upload media to your Spaced library.')
+    .action((path) => console.log(`Uploading media from ${path}...`));
+
+program.command('download')
+    .argument('<id>', 'Unique ID of the media.')
+    .argument('<dest>', 'Name of the file to write to.')
+    .description('Download media from your Spaced library.')
+    .action((id, dest) => console.log(`Downloading media with ID ${id} to ${dest}...`));
+
+/* Create Resource Operations */
+const create = program.command('create')
+    .description('Create operations.');
+
+create.command('space')
+    .argument('<name>', 'Name of the space.')
+    .option('-d, --description <description>', 'Description of the space.')
+    .option('-p, --public', 'Make the space public.')
+    .description('Create a new space.')
+    .action((name, options) => console.log(`Creating space ${name}...`));
+
+/* List Resource Operations */
+const list = program.command('list')
+    .description('List operations.');
+
+list.command('spaces')
+    .description('List all spaces you own.')
+    .action(() => console.log('Listing spaces...'));
+
+/* Delete Resource Operations */
+const del = program.command('delete')
+    .description('Delete operations.');
+
+del.command('space')
+    .argument('<name>', 'Unique name of the space.')
+    .description('Delete a space.')
+    .action((name) => console.log(`Deleting space ${name}...`));
+
+/* Update Resource Operations */
+const update = program.command('update')
+    .description('Update operations.');
+
+update.command('space')
+    .argument('<name>', 'Unique name of the space.')
+    .option('-n, --new-name <newName>', 'New name of the space.')
+    .option('-d, --description <description>', 'Description of the space.')
+    .option('-p, --public', 'Make the space public.')
+    .description('Update a space.')
+    .action((name, options) => console.log(`Updating space ${name}...`));
+
+/* Get Resource Operations */
+const get = program.command('get')
+    .description('Get operations.');
+
+get.command('space')
+    .argument('<name>', 'Unique name of the space.')
+    .description('Get a space.')
+    .action((name) => console.log(`Getting space ${name}...`));
 
 program.parse(process.argv);
