@@ -9,73 +9,71 @@ program
 /* Authentication */
 program.command('login')
     .argument('<email>', 'Email address.')
-    .argument('<password>', 'Password.')
     .description('Login to Spaced API.')
     .action((email, password) => console.log(`Logging in as ${email}...`));
-
-program.command('logout')
-    .description('Logout of Spaced API.')
-    .action(() => console.log('Logging out...'));
 
 /* Library */
 program.command('upload')
     .argument('<path>', 'Path to media file or folder.')
-    .description('Upload media to your Spaced library.')
+    .description('Encrypt and upload media to your Spaced library.')
     .action((path) => console.log(`Uploading media from ${path}...`));
 
 program.command('download')
     .argument('<id>', 'Unique ID of the media.')
-    .argument('<dest>', 'Name of the file to write to.')
-    .description('Download media from your Spaced library.')
+    .argument('<dest>', 'Name of the file or folder to write to.')
+    .description('Download encrypted media from your Spaced library and decrypt it.')
     .action((id, dest) => console.log(`Downloading media with ID ${id} to ${dest}...`));
 
-/* Create Resource Operations */
-const create = program.command('create')
-    .description('Create operations.');
+const space = program.command('space')
+    .description('Manage your spaces.');
 
-create.command('space')
+space.command('list')
+    .description('List your spaces.')
+    .option('-p, --page <page>', 'Page number.', '1')
+    .action((page) => console.log(`Listing spaces on page ${page}...`));
+
+space.command('search')
+    .argument('<query>', 'Search query.')
+    .description('Search for public spaces.')
+    .action((query) => console.log(`Searching for spaces with query ${query}...`));
+
+space.command('create')
     .argument('<name>', 'Name of the space.')
     .option('-d, --description <description>', 'Description of the space.')
-    .option('-p, --public', 'Make the space public.')
+    .option('-p, --public', 'Make the space public. Public spaces are visible to everyone.')
     .description('Create a new space.')
     .action((name, options) => console.log(`Creating space ${name}...`));
 
-/* List Resource Operations */
-const list = program.command('list')
-    .description('List operations.');
-
-list.command('spaces')
-    .description('List all spaces you own.')
-    .action(() => console.log('Listing spaces...'));
-
-/* Delete Resource Operations */
-const del = program.command('delete')
-    .description('Delete operations.');
-
-del.command('space')
-    .argument('<name>', 'Unique name of the space.')
+space.command('delete')
+    .argument('<id>', 'Unique ID of the space.')
     .description('Delete a space.')
-    .action((name) => console.log(`Deleting space ${name}...`));
+    .action((id) => console.log(`Deleting space with ID ${id}...`));
 
-/* Update Resource Operations */
-const update = program.command('update')
-    .description('Update operations.');
+space.command('join')
+    .argument('<name>', 'Unique name of the public space.')
+    .description('Join a public space.')
+    .action((id) => console.log(`Joining space with ID ${id}...`));
 
-update.command('space')
+space.command('leave')
     .argument('<name>', 'Unique name of the space.')
-    .option('-n, --new-name <newName>', 'New name of the space.')
-    .option('-d, --description <description>', 'Description of the space.')
-    .option('-p, --public', 'Make the space public.')
-    .description('Update a space.')
-    .action((name, options) => console.log(`Updating space ${name}...`));
+    .description('Leave a space.')
+    .action((id) => console.log(`Leaving space with ID ${id}...`));
 
-/* Get Resource Operations */
-const get = program.command('get')
-    .description('Get operations.');
+program.command('publish')
+    .argument('<id>', 'Unique ID of the media.')
+    .argument('<space>', 'Unique name of the space.')
+    .option('-d, --description <description>', 'Description of the media.')
+    .option('-t, --tags <tags>', 'Comma-separated list of tags.')
+    .description('Publish media to a space.')
+    .action((id, space, options) => console.log(`Publishing media with ID ${id} to space ${space}...`));
 
-get.command('space')
-    .argument('<name>', 'Unique name of the space.')
-    .description('Get a space.')
-    .action((name) => console.log(`Getting space ${name}...`));
+program.command('unpublish')
+    .argument('<id>', 'Unique ID of the media.')
+    .argument('<space>', 'Unique name of the space.')
+    .description('Unpublish media from a space.')
+    .action((id, space) => console.log(`Unpublishing media with ID ${id} from space ${space}...`));
+
+// TODO: how do I have visibility on what items have been published to a space?
+
 
 program.parse(process.argv);
