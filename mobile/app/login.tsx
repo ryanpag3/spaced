@@ -4,7 +4,7 @@ import StyledTextInput from '@/components/StyledTextInput';
 import { useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/components/useAuth';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 export default function Login() {
   const router = useRouter();
@@ -74,6 +74,10 @@ export default function Login() {
           onPress={onSubmit}
           style={{ padding: 10, borderRadius: 5, width: '80%' }}
         >Login</Button>
+        <Link
+          href="/signup"
+          style={{ padding: 10, borderRadius: 5, width: '80%', textAlign: 'center' }}
+        >Don't have an account? Sign Up</Link>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </View>
     </SafeAreaView>

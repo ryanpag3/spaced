@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/components/useAuth';
+import { useRouter } from 'expo-router';
 
 export default function SignUp() {
   const { signUp } = useAuth();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +50,7 @@ export default function SignUp() {
     if (validateForm()) {
       try {
         await signUp(email, password);
+        router.replace("/");
       } catch (e) {
         console.log(e);
         setError('An error occurred');
