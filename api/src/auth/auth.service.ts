@@ -3,12 +3,11 @@ import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { UserDto } from 'src/users/dto/UserDto';
-import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
 
-    constructor(usersService: UsersService) { }
+    constructor() { }
 
     isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
