@@ -29,10 +29,22 @@ export default function Login() {
     return true;
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (validateForm()) {
       // Handle form submission
-      console.log('Form submitted', { email, password });
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.message || 'Login failed');
+        return;
+      }
+
       // Reset form fields
       setEmail('');
       setPassword('');
