@@ -1,32 +1,29 @@
-#!/usr/bin/env node
-
-import { program } from "commander";
-import initialize from './cmd/init';
-import runCommand from './lib/command';
-import { downloadMedia, uploadMedia } from './cmd/media';
+import { program } from 'commander';
 
 program
-    .name("spaced")
-    .description("CLI tool for interfacing with Spaced API.")
-    .version("v1beta1");
+    .name('spd')
+    .description('Interface with Spaced API endpoints.')
+    .version('v1beta1');
 
-program.command("init")
-    .description("Initialize Spaced CLI.")
-    // we don't wrap init inside runCommand as it is the first command to be run
-    .action(async () => initialize());
+/* Authentication */
+program.command('login')
+    .argument('<email>', 'Email address.')
+    .argument('<password>', 'Password.')
+    .description('Login to Spaced API.')
+    .action((email, password) => console.log(`Logging in as ${email}...`));
 
-const media = program.command("media")
-    .description("CRUD operations for media.");
+program.command('logout')
+    .description('Logout from Spaced API.')
+    .action(() => console.log('Logging out...'));
 
-media.command("upload")
-    .description("CRUD operations for media.")
-    .requiredOption("-p, --path <path>", "Path to media file.")
-    .action((options) => runCommand(async () => uploadMedia(options.path)));
+program.command('upload')
+    .argument('<file>', 'File or folder to upload.')
+    .description('Upload a file to Spaced API.')
+    .action((file) => console.log(`Uploading ${file}...`));
 
-media.command("download")
-    .description("Download media.")
-    .requiredOption("--id <id>", "Unique ID of the media.")
-    .requiredOption("--dest <dest>", "Name of the file to write to.")
-    .action((options) => runCommand(async () => downloadMedia(options.id, options.dest)));
+program.command('download')
+    .argument('<file>', 'File to download.')
+    .description('Download a file from Spaced API.')
+    .action((file) => console.log(`Downloading ${file}...`));
 
 program.parse(process.argv);
