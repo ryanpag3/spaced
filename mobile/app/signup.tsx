@@ -41,14 +41,25 @@ export default function SignUp() {
     return true;
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (validateForm()) {
       // Handle form submission
+      const res = await fetch('http://localhost:3000/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.status !== 201) {
+        setError(data.message || 'An error occurred');
+        return;
+      }
       console.log('Form submitted', { email, password });
-      // Reset form fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+      
+
+      // Redirect to Home page
     }
   };
 
