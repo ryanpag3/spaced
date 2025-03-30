@@ -3,8 +3,13 @@ import { Text, View, Button } from '@/components/Themed';
 import StyledTextInput from '@/components/StyledTextInput';
 import { useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useAuth } from '@/components/useAuth';
+import { useRouter } from 'expo-router';
 
 export default function Login() {
+  const router = useRouter();
+  const { signIn } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -33,22 +38,13 @@ export default function Login() {
   const onSubmit = async () => {
     if (validateForm()) {
       // Handle form submission
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.message || 'Login failed');
-        return;
+      try {
+        await signIn(email, password);
+        router.replace("/");
+      } catch (e) {
+        console.log(e);
+        setError('An error occurred');
       }
-
-      await SecureStore.setItemAsync('userToken', data.token);
-
-      Alert.alert('Login Successful', 'You have logged in successfully!');
     }
   };
 

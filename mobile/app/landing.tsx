@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Root() {
+export default function Landing() {
   const router = useRouter();
 
   return (
