@@ -25,8 +25,9 @@ export class AuthController {
 
         user.password = await this.authService.hashPassword(user.password);
 
+        let userResult;
         try {
-            await this.usersService.create(user);
+            userResult = await this.usersService.create(user);
         }   catch (error) {
             if (error.code === '23505') {
                 throw new ConflictException('User already exists with the specified email.');
@@ -34,7 +35,7 @@ export class AuthController {
             throw new BadRequestException('User creation failed');
         }
 
-        return this.authService.respondSuccess(res, user);
+        return this.authService.respondSuccess(res, userResult);
     }
 
     @Post('login')
