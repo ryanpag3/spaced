@@ -4,6 +4,7 @@ import prisma from 'src/db/prisma';
 import { CreateUserDto } from './dto/CreateUserDto';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/UserDto';
+import { AuthUserDto } from './dto/AuthUserDto';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +13,7 @@ export class UsersService {
         const userResult = await prisma.user.create({
             data: user,
         });
-        return plainToInstance(UserDto, userResult);
+        return plainToInstance(AuthUserDto, userResult);
     }
 
     async getByEmail(email: string) {
@@ -21,7 +22,7 @@ export class UsersService {
                 email,
             },
         });
-        return plainToInstance(UserDto, user);
+        return plainToInstance(AuthUserDto, user);
     }
 
     
