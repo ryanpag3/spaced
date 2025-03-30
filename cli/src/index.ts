@@ -8,6 +8,7 @@ program
 /* Authentication */
 program.command('login')
     .argument('<email>', 'Email address.')
+    .argument('<password>', 'Password.')
     .description('Login to Spaced API.')
     .action((email, password) => console.log(`Logging in as ${email}...`));
 
