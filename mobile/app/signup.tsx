@@ -1,8 +1,9 @@
 import StyledTextInput from '@/components/StyledTextInput';
 import { Button, View, Text } from '@/components/Themed';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -56,10 +57,12 @@ export default function SignUp() {
         setError(data.message || 'An error occurred');
         return;
       }
-      console.log('Form submitted', { email, password });
-      
 
-      // Redirect to Home page
+      await SecureStore.setItemAsync('userToken', data.token);
+
+      Alert.alert('Success', 'Account created successfully!');
+
+      // TODO: Redirect to Home page
     }
   };
 

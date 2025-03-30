@@ -1,7 +1,8 @@
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { Alert, SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View, Button } from '@/components/Themed';
 import StyledTextInput from '@/components/StyledTextInput';
 import { useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -45,9 +46,9 @@ export default function Login() {
         return;
       }
 
-      // Reset form fields
-      setEmail('');
-      setPassword('');
+      await SecureStore.setItemAsync('userToken', data.token);
+
+      Alert.alert('Login Successful', 'You have logged in successfully!');
     }
   };
 
