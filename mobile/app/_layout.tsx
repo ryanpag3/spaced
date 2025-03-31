@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '@/components/useAuth';
 import { Alert } from 'react-native';
+import { SelectedAlbumsProvider } from '@/components/useSelectedAlbums';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -53,7 +54,9 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaProvider>
         <AuthProvider>
-          <Slot />
+          <SelectedAlbumsProvider>
+            <Slot />
+          </SelectedAlbumsProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>
