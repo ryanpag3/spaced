@@ -1,11 +1,15 @@
 import StyledTextInput from '@/components/StyledTextInput';
 import { Button, View, Text } from '@/components/Themed';
 import { useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as SecureStore from 'expo-secure-store';
+import { useAuth } from '@/components/useAuth';
+import { useRouter } from 'expo-router';
 
 export default function SignUp() {
+  const { signUp } = useAuth();
+  const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,28 +48,15 @@ export default function SignUp() {
 
   const onSubmit = async () => {
     if (validateForm()) {
-      // Handle form submission
-      const res = await fetch('http://localhost:3000/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (res.status !== 201) {
-        setError(data.message || 'An error occurred');
-        return;
+      try {
+        await signUp(email, password);
+        router.replace("/");
+      } catch (e) {
+        console.log(e);
+        setError('An error occurred');
       }
-
-      await SecureStore.setItemAsync('userToken', data.token);
-
-      Alert.alert('Success', 'Account created successfully!');
-
-      // TODO: Redirect to Home page
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
