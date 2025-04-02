@@ -114,3 +114,17 @@ flowchart TD
     B --> D[Spaced Database]
 ```
 
+#### Private Profiles
+
+Users can request to follow private profiles. A user requests to follow an account, and when that request is accepted the requester's `Public Key` is used to encrypt the `Space Key` representing that user's profile.
+
+```mermaid
+flowchart TD
+    A[Space Key] --> B[Encrypted Space Key]
+    C[Requester's Public Key] --> B[Encrypted Space Key]
+    B --> D[Spaced Database]
+```
+
+## Key Rotation
+
+In all cases, we will rotate `Space Keys` on occasion to ensure that nobody has lingering access to data they are no longer privy to. More details on the "what" and "when" of key rotation will be coming at a later date.

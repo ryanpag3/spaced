@@ -50,6 +50,7 @@ export default function SignUp() {
     if (validateForm()) {
       try {
         await signUp(email, password);
+        // TODO: generate master key
         router.replace("/");
       } catch (e) {
         console.log(e);
