@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import Crypto from '@/lib/crypto';
 
 interface AuthUser {
     id: string;
@@ -53,6 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 throw new Error('No token received');
             }
             await SecureStore.setItemAsync('userToken', token);
+    
+            const keyPairKey = await Crypto.generateKeyPair(); // TODO: replace with masterKey
+            const keyEncryptionKey = await Crypto.generateKeyEncryptionKey(password);
+            console.log(keyEncryptionKey);
+
             setIsAuthenticated(true);
             // we may want to query the user info and store it on login
         } catch (error) {
