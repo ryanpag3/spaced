@@ -7,4 +7,17 @@ export class CreateUserDto {
     @IsString()
     @MinLength(6)
     password: string;
+
+    @IsString()
+    encryptedMasterKey: string;
+
+    @IsString()
+    encryptedPrivateKey: string;
+
+    @IsString()
+    publicKey: string;
+
+    @IsString()
+    kekSalt: string;
+    
 }
