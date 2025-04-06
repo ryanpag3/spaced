@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ConflictException, Controller, Post, Res, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Logger, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 import { UsersService } from 'src/users/users.service';
@@ -16,6 +16,7 @@ export class AuthController {
 
     @Post('signup')
     async signup(@Body() user: CreateUserDto, @Res() res: Response) {
+        
         if (!this.authService.isValidEmail(user.email)) {
             throw new BadRequestException('Invalid email format');
         }
@@ -29,6 +30,7 @@ export class AuthController {
         try {
             userResult = await this.usersService.create(user);
         }   catch (error) {
+            Logger.error(`error while creating user`, error);
             if (error.code === '23505') {
                 throw new ConflictException('User already exists with the specified email.');
             }

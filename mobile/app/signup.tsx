@@ -5,15 +5,17 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/components/useAuth';
 import { useRouter } from 'expo-router';
+import { faker } from '@faker-js/faker';
 
 export default function SignUp() {
   const { signUp } = useAuth();
   const router = useRouter();
 
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const genPassword = faker.internet.password();
+  const [username, setUsername] = useState(faker.internet.username());
+  const [email, setEmail] = useState(faker.internet.email());
+  const [password, setPassword] = useState(genPassword);
+  const [confirmPassword, setConfirmPassword] = useState(genPassword);
   const [error, setError] = useState('');
 
   const validateEmail = (email: string) => {

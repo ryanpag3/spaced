@@ -1,6 +1,7 @@
 import Crypto from './crypto';
 import * as SecureStore from 'expo-secure-store';
 import SpacedApi from '@/api/spaced';
+import { fromByteArray } from 'base64-js';
 
 export type MasterKeyMaterial = {
     key: Uint8Array<ArrayBufferLike>,
@@ -19,13 +20,15 @@ export default class Auth {
 
     static async signUp(username: string, email: string, password: string) {
         const masterKeyMaterial = await this.createMasterKeyMaterial(password);
+        console.log(masterKeyMaterial);
         const result = await SpacedApi.signUp(
             username,
             email,
             password,
-            masterKeyMaterial.encryptedKey.encryptedMasterKey,
-            masterKeyMaterial.kek.salt,
-            masterKeyMaterial.encryptedKey.nonce
+            // we store the unsigned array as a base64 encoded string in the database
+            fromByteArray(masterKeyMaterial.encryptedKey.encryptedMasterKey),
+            fromByteArray(masterKeyMaterial.kek.salt),
+            fromByteArray(masterKeyMaterial.encryptedKey.nonce)
         );
         console.log(result);
     }

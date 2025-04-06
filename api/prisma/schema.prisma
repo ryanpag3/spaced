@@ -15,12 +15,13 @@ datasource db {
 
 model User {
   id       String @id @default(uuid())
+  username String @unique
   email    String @unique
   password String
   publicKey String?
   encryptedMasterKey String?
-  encryptedPrivateKey String?
   kekSalt String?
+  masterKeyNonce String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

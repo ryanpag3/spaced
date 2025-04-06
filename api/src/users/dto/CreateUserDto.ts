@@ -1,6 +1,10 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
+
+    @IsString()
+    username: string;
+
     @IsEmail()
     email: string;
 
@@ -12,12 +16,9 @@ export class CreateUserDto {
     encryptedMasterKey: string;
 
     @IsString()
-    encryptedPrivateKey: string;
-
-    @IsString()
-    publicKey: string;
-
-    @IsString()
     kekSalt: string;
+
+    @IsString()
+    masterKeyNonce: string;
     
 }
