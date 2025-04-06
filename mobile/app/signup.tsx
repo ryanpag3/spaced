@@ -5,14 +5,17 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/components/useAuth';
 import { useRouter } from 'expo-router';
+import { faker } from '@faker-js/faker';
 
 export default function SignUp() {
   const { signUp } = useAuth();
   const router = useRouter();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const genPassword = faker.internet.password();
+  const [username, setUsername] = useState(faker.internet.username());
+  const [email, setEmail] = useState(faker.internet.email());
+  const [password, setPassword] = useState(genPassword);
+  const [confirmPassword, setConfirmPassword] = useState(genPassword);
   const [error, setError] = useState('');
 
   const validateEmail = (email: string) => {
@@ -49,8 +52,7 @@ export default function SignUp() {
   const onSubmit = async () => {
     if (validateForm()) {
       try {
-        await signUp(email, password);
-        // TODO: generate master key
+        await signUp(username, email, password);
         router.replace("/");
       } catch (e) {
         console.log(e);
@@ -62,6 +64,15 @@ export default function SignUp() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
+        <StyledTextInput
+          style={styles.input}
+          placeholder="Username"
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="next"
+          value={username}
+          onChangeText={setUsername}
+        />
         <StyledTextInput
           style={styles.input}
           placeholder="Email"

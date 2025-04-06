@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "encryptedMasterKey" TEXT,
+ADD COLUMN     "encryptedPrivateKey" TEXT,
+ADD COLUMN     "kekSalt" TEXT,
+ADD COLUMN     "publicKey" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
