@@ -10,6 +10,7 @@ export default function SignUp() {
   const { signUp } = useAuth();
   const router = useRouter();
 
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,8 +50,7 @@ export default function SignUp() {
   const onSubmit = async () => {
     if (validateForm()) {
       try {
-        await signUp(email, password);
-        // TODO: generate master key
+        await signUp(username, email, password);
         router.replace("/");
       } catch (e) {
         console.log(e);
@@ -62,6 +62,15 @@ export default function SignUp() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
+        <StyledTextInput
+          style={styles.input}
+          placeholder="Username"
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="next"
+          value={username}
+          onChangeText={setUsername}
+        />
         <StyledTextInput
           style={styles.input}
           placeholder="Email"

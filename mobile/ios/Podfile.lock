@@ -1275,6 +1275,10 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
+  - react-native-config (1.5.5):
+    - react-native-config/App (= 1.5.5)
+  - react-native-config/App (1.5.5):
+    - React-Core
   - react-native-libsodium (1.4.0):
     - RCT-Folly
     - RCTRequired
@@ -1856,6 +1860,7 @@ DEPENDENCIES:
   - React-logger (from `../../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-config (from `../../node_modules/react-native-config`)
   - react-native-libsodium (from `../../node_modules/react-native-libsodium`)
   - react-native-safe-area-context (from `../../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../../node_modules/react-native/ReactCommon`)
@@ -2008,6 +2013,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-config:
+    :path: "../../node_modules/react-native-config"
   react-native-libsodium:
     :path: "../../node_modules/react-native-libsodium"
   react-native-safe-area-context:
@@ -2135,6 +2142,7 @@ SPEC CHECKSUMS:
   React-logger: 5320a2acb25baa566cda59b611231929dd3ed7fc
   React-Mapbuffer: 0d55aa10e3dcbc51121df490f1ffff427d68e6f2
   React-microtasksnativemodule: c2bc0e0f39308276c073feaca6a0dd453d4172c5
+  react-native-config: 3367df9c1f25bb96197007ec531c7087ed4554c3
   react-native-libsodium: e2a6864429cc1a4d8ead60bcb4607523f1744ec7
   react-native-safe-area-context: 286b3e7b5589795bb85ffc38faf4c0706c48a092
   React-nativeconfig: ecf4dc92c40b97e2b3f0c619938f78bfd6507b08
