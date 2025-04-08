@@ -1,13 +1,35 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsString, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsString, IsOptional, MinLength, IsUUID } from 'class-validator';
 
 @Exclude()
 export class UserDto {
+
+    @IsUUID()
+    @IsOptional()
+    @Expose()
+    id: string;
+
+    @IsString()
+    @Expose()
+    username: string;
+
     @IsEmail()
     @Expose()
-    readonly email: string;
+    email: string;
 
     @IsString()
     @MinLength(6)
-    readonly password: string;
+    password: string;
+
+    @IsString()
+    @Expose()
+    encryptedMasterKey: string;
+
+    @IsString()
+    @Expose()
+    kekSalt: string;
+
+    @IsString()
+    @Expose()
+    masterKeyNonce: string;
 }

@@ -1,8 +1,13 @@
-import { BadRequestException, Body, ConflictException, Controller, Logger, Post, Res, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dto/CreateUserDto';
-import { UsersService } from 'src/users/users.service';
+import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
+import { AuthenticatedRequest } from 'src/common/types/request.type';
+import { UserDto } from 'src/users/dto/UserDto';
+import { UsersService } from 'src/users/users.service';
+import Public from '../common/decorators/public.decorator';
+import { AuthService } from './auth.service';
+import { KeysDto } from './dto/KeysDto';
+import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,18 +20,10 @@ export class AuthController {
     }
 
     @Post('signup')
+    @Public()
     async signup(@Body() user: CreateUserDto, @Res() res: Response) {
-        
-        if (!this.authService.isValidEmail(user.email)) {
-            throw new BadRequestException('Invalid email format');
-        }
-        if (!this.authService.isValidPassword(user.password)) {
-            throw new BadRequestException('Invalid password format');
-        }
-
         user.password = await this.authService.hashPassword(user.password);
-
-        let userResult;
+        let userResult: UserDto|undefined;
         try {
             userResult = await this.usersService.create(user);
         }   catch (error) {
@@ -36,11 +33,11 @@ export class AuthController {
             }
             throw new BadRequestException('User creation failed');
         }
-
         return this.authService.respondSuccess(res, userResult);
     }
 
     @Post('login')
+    @Public()
     async login(@Body() login: { email: string, password: string }, @Res() res: Response) {
         const unauthorizedMessage = 'Invalid username or password.';
         const user = await this.usersService.getByEmail(login.email);
@@ -54,6 +51,16 @@ export class AuthController {
         }
 
         return this.authService.respondSuccess(res, user);
+    }
+
+    @Get('keys')
+    async getKeys(@Req() request: AuthenticatedRequest) {
+        const payload = request.user;
+        const user = await this.usersService.getByPk(payload.id);
+        const keyMaterial = plainToInstance(KeysDto, user);
+        return {
+            data: keyMaterial
+        }
     }
 
 }
