@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
@@ -7,7 +8,7 @@ import { UserDto } from 'src/users/dto/UserDto';
 @Injectable()
 export class AuthService {
 
-    constructor() { }
+    constructor(private jwtService: JwtService) {}
 
     isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,7 +29,7 @@ export class AuthService {
     }
 
     async respondSuccess(res: Response, user: UserDto) {
-        const token = jwt.sign({ sub: user.email }, process.env.JWT_SECRET);
+        const token = this.jwtService.sign({ sub: user.id });
         res.cookie('auth_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

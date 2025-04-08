@@ -1,8 +1,13 @@
-import { BadRequestException, Body, ConflictException, Controller, Logger, Post, Res, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 import { UsersService } from 'src/users/users.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { UserDto } from 'src/users/dto/UserDto';
+import Public from './public.decorator';
+import { AuthenticatedRequest } from 'src/common/types/request.type';
+import { plainToInstance } from 'class-transformer';
+import { KeysDto } from './dto/KeysDto';
+import crypto from 'crypto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +20,8 @@ export class AuthController {
     }
 
     @Post('signup')
-    async signup(@Body() user: CreateUserDto, @Res() res: Response) {
+    @Public()
+    async signup(@Body() user: UserDto, @Res() res: Response) {
         
         if (!this.authService.isValidEmail(user.email)) {
             throw new BadRequestException('Invalid email format');
@@ -41,6 +47,7 @@ export class AuthController {
     }
 
     @Post('login')
+    @Public()
     async login(@Body() login: { email: string, password: string }, @Res() res: Response) {
         const unauthorizedMessage = 'Invalid username or password.';
         const user = await this.usersService.getByEmail(login.email);
@@ -54,6 +61,16 @@ export class AuthController {
         }
 
         return this.authService.respondSuccess(res, user);
+    }
+
+    @Get('keys')
+    async getKeys(@Req() request: AuthenticatedRequest) {
+        const payload = request.user;
+        const user = await this.usersService.getByPk(payload.id);
+        const keyMaterial = plainToInstance(KeysDto, user);
+        return {
+            data: keyMaterial
+        }
     }
 
 }
