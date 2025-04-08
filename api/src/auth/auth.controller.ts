@@ -1,13 +1,13 @@
 import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { UsersService } from 'src/users/users.service';
-import { Request, Response } from 'express';
-import { UserDto } from 'src/users/dto/UserDto';
-import Public from './public.decorator';
-import { AuthenticatedRequest } from 'src/common/types/request.type';
 import { plainToInstance } from 'class-transformer';
+import { Response } from 'express';
+import { AuthenticatedRequest } from 'src/common/types/request.type';
+import { UserDto } from 'src/users/dto/UserDto';
+import { UsersService } from 'src/users/users.service';
+import Public from '../common/decorators/public.decorator';
+import { AuthService } from './auth.service';
 import { KeysDto } from './dto/KeysDto';
-import crypto from 'crypto';
+import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,18 +21,9 @@ export class AuthController {
 
     @Post('signup')
     @Public()
-    async signup(@Body() user: UserDto, @Res() res: Response) {
-        
-        if (!this.authService.isValidEmail(user.email)) {
-            throw new BadRequestException('Invalid email format');
-        }
-        if (!this.authService.isValidPassword(user.password)) {
-            throw new BadRequestException('Invalid password format');
-        }
-
+    async signup(@Body() user: CreateUserDto, @Res() res: Response) {
         user.password = await this.authService.hashPassword(user.password);
-
-        let userResult;
+        let userResult: UserDto|undefined;
         try {
             userResult = await this.usersService.create(user);
         }   catch (error) {
@@ -42,7 +33,6 @@ export class AuthController {
             }
             throw new BadRequestException('User creation failed');
         }
-
         return this.authService.respondSuccess(res, userResult);
     }
 

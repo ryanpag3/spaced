@@ -16,7 +16,7 @@ export default class SpacedApi {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
         });        
     }
 }

@@ -17,10 +17,10 @@ export type MasterKeyMaterial = {
 
 export default class Auth {
     static readonly MASTERKEY = 'MASTER_KEY';
+    static readonly AUTH_TOKEN_KEY = 'auth.token';
 
     static async signUp(username: string, email: string, password: string) {
         const masterKeyMaterial = await this.createMasterKeyMaterial(password);
-        console.log(masterKeyMaterial);
         const result = await SpacedApi.signUp(
             username,
             email,
@@ -30,8 +30,20 @@ export default class Auth {
             fromByteArray(masterKeyMaterial.kek.salt),
             fromByteArray(masterKeyMaterial.encryptedKey.nonce)
         );
-        console.log(result);
+        if (result.status !== 201) {
+            throw new Error('An error occured rwhile signing up for Spaced.');
+        }
+        const body = await result.json() as { token: string };
+        await this.storeAuthToken(body.token);
     }
+
+    static async storeAuthToken(token: string) {
+        return SecureStore.setItemAsync(this.AUTH_TOKEN_KEY, token);
+    }
+
+    static async getAuthToken() {
+        return SecureStore.getItemAsync(this.AUTH_TOKEN_KEY);
+    }    
 
     static async createMasterKeyMaterial(password: string): Promise<{
         key: Uint8Array<ArrayBufferLike>,
