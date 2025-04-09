@@ -33,14 +33,14 @@ export class AuthController {
             }
             throw new BadRequestException('User creation failed');
         }
-        return this.authService.respondSuccess(res, userResult);
+        return this.authService.respondSuccess(res, userResult.id);
     }
 
     @Post('login')
     @Public()
     async login(@Body() login: { email: string, password: string }, @Res() res: Response) {
         const unauthorizedMessage = 'Invalid username or password.';
-        const user = await this.usersService.getByEmail(login.email);
+        const user = await this.usersService.getAuthDetails(login.email);
         if (!user) {
             throw new UnauthorizedException(unauthorizedMessage);
         }
@@ -50,7 +50,7 @@ export class AuthController {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        return this.authService.respondSuccess(res, user);
+        return this.authService.respondSuccess(res, user.id);
     }
 
     @Get('keys')

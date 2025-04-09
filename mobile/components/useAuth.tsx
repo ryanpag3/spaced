@@ -37,33 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signIn = async (email: string, password: string) => {
-        // try {
-        //     const response = await fetch('http://localhost:3000/auth/login', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({ email, password }),
-        //     });
-        //     const data = await response.json();
-        //     if (!response.ok) {
-        //         throw new Error(data.message || 'Login failed');
-        //     }
-        //     const token = data.token;
-        //     if (!token) {
-        //         throw new Error('No token received');
-        //     }
-        //     await SecureStore.setItemAsync('userToken', token);
-
-        //     const keyPairKey = await Crypto.generateKeyPair(); // TODO: replace with masterKey
-        //     const keyEncryptionKey = await Crypto.generateKeyEncryptionKey(password);
-        //     console.log(keyEncryptionKey);
-
-        //     setIsAuthenticated(true);
-        //     // we may want to query the user info and store it on login
-        // } catch (error) {
-        //     throw error;
-        // }
+        try {
+            await Auth.login(email, password);
+            setIsAuthenticated(true);
+        } catch (e) {
+            setIsAuthenticated(false);
+            throw e;
+        }
     };
 
     const signUp = async (username: string, email: string, password: string) => {
@@ -76,24 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const initializeCrypto = async (password: string) => {
-        try {
-            await initializeMasterKey();
-
-        } catch (error) {
-            throw error;
-        }
-    };
-
-
-
-    const initializeMasterKey = async () => {
-
-    };
-
     const signOut = async () => {
         try {
-            await SecureStore.deleteItemAsync('userToken');
+            await Auth.logout();
         } catch (error) {
             throw error;
         } finally {

@@ -4,18 +4,12 @@ import * as SecureStore from 'expo-secure-store';
 
 export default class Crypto {
 
-    /**
-     * Generate a cryptographically secure encryption key with a specified length.
-     */
     static async generateEncryptionKey(lenBytes: number = 32): Promise<Uint8Array> {
         return Sodium.randombytes_buf(lenBytes);
     }
 
-    /**
-     * Generate a Key Encryption Key (KEK) from the user's password.
-     */
-    static async generateKek(password: string) {
-        const salt = Sodium.randombytes_buf(Sodium.crypto_pwhash_SALTBYTES);
+    static async generateKek(password: string, salt?: Uint8Array) {
+        salt = salt ? salt : Sodium.randombytes_buf(Sodium.crypto_pwhash_SALTBYTES);
         const kek = Sodium.crypto_pwhash(
             32,
             password,
@@ -30,9 +24,6 @@ export default class Crypto {
         };
     }
 
-    /**
-     * Encrypt the master key using the KEK.
-     */
     static async encryptMasterKey(masterKey: Uint8Array, kek: Uint8Array) {
         const nonce = Sodium.randombytes_buf(Sodium.crypto_secretbox_NONCEBYTES);
         const encryptedMasterKey = Sodium.crypto_secretbox_easy(masterKey, nonce, kek);
@@ -40,5 +31,9 @@ export default class Crypto {
             encryptedMasterKey,
             nonce
         };
+    }
+
+    static async decryptMasterKey(encryptedMasterKey: Uint8Array, nonce: Uint8Array, kek: Uint8Array) {
+        return Sodium.crypto_secretbox_open_easy(encryptedMasterKey, nonce, kek);
     }
 }

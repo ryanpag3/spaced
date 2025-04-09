@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import prisma from 'src/db/prisma';
 import { UserDto } from './dto/UserDto';
+import { AuthUserDto } from './dto/AuthUserDto';
 
 @Injectable()
 export class UsersService {
@@ -11,6 +12,15 @@ export class UsersService {
             data: user,
         });
         return plainToInstance(UserDto, userResult);
+    }
+
+    async getAuthDetails(email: string) {
+        const user = await prisma.user.findUnique({
+            where: {
+                email,
+            },
+        });
+        return plainToInstance(AuthUserDto, user);
     }
 
     async getByEmail(email: string) {

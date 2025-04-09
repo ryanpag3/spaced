@@ -29,6 +29,9 @@ import {
       }
   
       this.logger.error(`[${request.method}] ${request.url} - ${message}`);
+      if (exception instanceof Error) {
+        this.logger.error(exception.stack);
+      }
   
       response.status(status).json({
         statusCode: status,
