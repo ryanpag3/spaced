@@ -98,21 +98,10 @@ export default class Auth {
         }
     }
 
-    static async storeMasterKeyMaterial(masterKey: any) {
-        return SecureStore.setItemAsync(this.MASTERKEY, JSON.stringify(masterKey));
-    }
-
-    static async getMasterKeyMaterial() {
-        return SecureStore.getItemAsync(this.MASTERKEY);
-    }
-
-    static async clearMasterKeyMaterial() {
-        return SecureStore.deleteItemAsync(this.MASTERKEY);
-    }
-
     static async logout() {
         await SecureStore.deleteItemAsync(this.AUTH_TOKEN);
-        await this.clearMasterKeyMaterial();
+        await SecureStore.deleteItemAsync(this.MASTERKEY);
+        await SecureStore.deleteItemAsync(this.KEYPAIR);
     }
 
     static async login(email: string, password: string) {
