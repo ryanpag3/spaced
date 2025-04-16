@@ -8,26 +8,39 @@ There are various flows necessary for handling end-to-end encryption in Spaced.
 
 ### User Registration
 
-When Spaced is installed on a device, it automatically generates a secure `Master Key`. When a user signs up for Spaced, we generate a `Key Encryption Key` or `KEK`. We then encrypt your `Master Key` with the `KEK` and store it securely on our database.
+When Spaced is installed on a device, it automatically generates a secure `Master Key` and `Key Pair` made up of a `Public Key` and `Private Key`. When a user signs up for Spaced, we generate a `Key Encryption Key` or `KEK`. We then encrypt your `Master Key` and `Private Key`  with the `KEK` and store it securely on our database.
 
 ```mermaid
-flowchart TD
-    A(Spaced Installed) --> B[Generate Master Key]
-    B --> C[User Signs Up]
-    C --> D[Generate KEK]
-    D --> E[Encrypt Master Key with KEK]
-    E --> F[Push Encrypted Master Key]
+sequenceDiagram
+    participant User
+    participant Client
+    participant Server
+
+    User->>Client: Enters Password
+    Client->>Client: Derive KEK = KDF(password, salt)
+    Client->>Client: Generate Master Key and Asymmetric Key Pair
+    Client->>Client: Encrypt Master Key and Private Key with KEK + unique nonces
+    Client->>Server: Upload Public Key, Encrypted Master Key, Encrypted Private Key, Nonces, and Salt
 ```
 
 ### User Login
 
-On subsequent logins, if you have successfully verified your email, we send back your encrypted `Master Key` that was saved on registration. You are prompted to enter your password, which will decrypt your `Master Key` and make it available locally on your client.
+On subsequent logins, if you have successfully verified your email, we send back your encrypted `Master Key` and `Key Pair` that was saved on registration. You are prompted to enter your password, which will decrypt your `Master Key` and `Private Key` and make it available locally on your client.
 
 ```mermaid
-flowchart TD
-    A[User Sign-In] --> B[Download encrypted Master Key]
-    B --> C[User enters password]
-    C --> D[Obtain Master Key]
+sequenceDiagram
+    participant User
+    participant Client
+    participant Server
+
+    User->>Client: Enters Email/Password
+    Client->>Server: Verify Email/Password
+    Server-->>Client: Return auth token
+    Client->>Server: GET keys w/ token
+    Server-->>Client: Return encrypted key material
+    Client->>Client: Derive KEK = KDF(password, salt) 
+    Client->>Client: Decrypt Master Key and Private Key with KEK + unique nonces
+    Client->>Client: Store mey material in secure storage
 ```
 
 ### Spaces
