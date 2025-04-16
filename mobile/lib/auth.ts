@@ -3,7 +3,25 @@ import { fromByteArray } from 'base64-js';
 import { Buffer } from 'buffer';
 import * as SecureStore from 'expo-secure-store';
 import Crypto, { KekMaterial } from './crypto';
-import { KeyPair } from 'react-native-libsodium';
+
+export type CombinedKeyMaterial = {
+    kekMaterial: KekMaterial;
+    masterKeyMaterial: {
+        plainText: Uint8Array<ArrayBufferLike>;
+        encrypted: Uint8Array<ArrayBufferLike>;
+        nonce: Uint8Array<ArrayBufferLike>;
+    };
+    keyPairMaterial: {
+        keyPair: {
+            publicKey: Uint8Array<ArrayBufferLike>;
+            privateKey: Uint8Array<ArrayBufferLike>;
+        };
+        encryptedPrivateKey: {
+            encryptedKey: Uint8Array<ArrayBufferLike>;
+            nonce: Uint8Array<ArrayBufferLike>;
+        };
+    };
+}
 
 export type GetKeysData = {
     data: EncryptedKeyMaterial
@@ -25,7 +43,7 @@ export default class Auth {
     static readonly AUTH_TOKEN = 'auth.token';
 
     static async signUp(username: string, email: string, password: string) {
-        const keyMaterial = await this.generateKeyMaterial(password);
+        const keyMaterial = this.generateKeyMaterial(password);
         await SecureStore.setItemAsync(this.MASTERKEY, JSON.stringify(keyMaterial.masterKeyMaterial));
         await SecureStore.setItemAsync(this.KEYPAIR, JSON.stringify(keyMaterial.keyPairMaterial));
         await SecureStore.setItemAsync(this.KEK, JSON.stringify(keyMaterial.kekMaterial));
@@ -50,7 +68,7 @@ export default class Auth {
         await SecureStore.setItemAsync(this.AUTH_TOKEN, body.token);
     }
 
-    static async generateKeyMaterial(password: string) {
+    static generateKeyMaterial(password: string): CombinedKeyMaterial {
         const kekMaterial = Crypto.generateKek(password);
         const masterKeyMaterial = this.generateMasterKeyMaterial(kekMaterial);
         const keyPairMaterial = this.generateKeyPairMaterial(kekMaterial);
@@ -125,7 +143,7 @@ export default class Auth {
 
         const masterKey = Crypto.decryptKey(encryptedMasterKey, masterKeyNonce, kekMaterial.kek);
         const privateKey = Crypto.decryptKey(encryptedPrivateKey, privateKeyNonce, kekMaterial.kek);
-        const keyMaterial = {
+        const keyMaterial: CombinedKeyMaterial = {
             kekMaterial,
             masterKeyMaterial: {
                 plainText: masterKey,
