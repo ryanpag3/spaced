@@ -23,6 +23,14 @@ export class UserDto {
 
     @IsString()
     @Expose()
+    encryptedPrivateKey: string;
+
+    @IsString()
+    @Expose()
+    publicKey: string;
+
+    @IsString()
+    @Expose()
     encryptedMasterKey: string;
 
     @IsString()
@@ -32,4 +40,8 @@ export class UserDto {
     @IsString()
     @Expose()
     masterKeyNonce: string;
+
+    @IsString()
+    @Expose()
+    privateKeyNonce: string;
 }

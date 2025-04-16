@@ -1,19 +1,26 @@
 import SpacedApi from '@/api/spaced';
 import { fromByteArray } from 'base64-js';
-import * as SecureStore from 'expo-secure-store';
 import { Buffer } from 'buffer';
-import Crypto from './crypto';
+import * as SecureStore from 'expo-secure-store';
+import Crypto, { KekMaterial } from './crypto';
 
-export type MasterKeyMaterial = {
-    key: Uint8Array<ArrayBufferLike>,
-    kek: {
-        kek: Uint8Array<ArrayBufferLike>;
-        salt: Uint8Array<ArrayBufferLike>;
-    },
-    encryptedKey: {
-        encryptedMasterKey: Uint8Array<ArrayBufferLike>;
+export type CombinedKeyMaterial = {
+    kekMaterial: KekMaterial;
+    masterKeyMaterial: {
+        plainText: Uint8Array<ArrayBufferLike>;
+        encrypted: Uint8Array<ArrayBufferLike>;
         nonce: Uint8Array<ArrayBufferLike>;
-    }
+    };
+    keyPairMaterial: {
+        keyPair: {
+            publicKey: Uint8Array<ArrayBufferLike>;
+            privateKey: Uint8Array<ArrayBufferLike>;
+        };
+        encryptedPrivateKey: {
+            encryptedKey: Uint8Array<ArrayBufferLike>;
+            nonce: Uint8Array<ArrayBufferLike>;
+        };
+    };
 }
 
 export type GetKeysData = {
@@ -22,82 +29,79 @@ export type GetKeysData = {
 
 export type EncryptedKeyMaterial = {
     encryptedMasterKey: string;
+    encryptedPrivateKey: string;
+    publicKey: string;
     kekSalt: string;
     masterKeyNonce: string;
+    privateKeyNonce: string;
 }
 
 export default class Auth {
     static readonly MASTERKEY = 'auth.masterKey';
-    static readonly AUTH_TOKEN_KEY = 'auth.token';
+    static readonly KEYPAIR = 'auth.keypair';
+    static readonly KEK = 'auth.kek';
+    static readonly AUTH_TOKEN = 'auth.token';
 
     static async signUp(username: string, email: string, password: string) {
-        const masterKeyMaterial = await this.createMasterKeyMaterial(password);
+        const keyMaterial = this.generateKeyMaterial(password);
+        await SecureStore.setItemAsync(this.MASTERKEY, JSON.stringify(keyMaterial.masterKeyMaterial));
+        await SecureStore.setItemAsync(this.KEYPAIR, JSON.stringify(keyMaterial.keyPairMaterial));
+        await SecureStore.setItemAsync(this.KEK, JSON.stringify(keyMaterial.kekMaterial));
+
         const result = await SpacedApi.signUp(
-            username,
-            email,
-            password,
-            // we store the unsigned array as a base64 encoded string in the database
-            fromByteArray(masterKeyMaterial.encryptedKey.encryptedMasterKey),
-            fromByteArray(masterKeyMaterial.kek.salt),
-            fromByteArray(masterKeyMaterial.encryptedKey.nonce)
+            {
+                username,
+                email,
+                password,
+                encryptedMasterKey: fromByteArray(keyMaterial.masterKeyMaterial.encrypted),
+                kekSalt: fromByteArray(keyMaterial.kekMaterial.salt),
+                masterKeyNonce: fromByteArray(keyMaterial.masterKeyMaterial.nonce),
+                encryptedPrivateKey: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.encryptedKey),
+                privateKeyNonce: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.nonce),
+                publicKey: fromByteArray(keyMaterial.keyPairMaterial.keyPair.publicKey)
+            }
         );
         if (result.status !== 201) {
             throw new Error('An error occured rwhile signing up for Spaced.');
         }
         const body = await result.json() as { token: string };
-        await this.storeAuthToken(body.token);
+        await SecureStore.setItemAsync(this.AUTH_TOKEN, body.token);
     }
 
-    static async storeAuthToken(token: string) {
-        return SecureStore.setItemAsync(this.AUTH_TOKEN_KEY, token);
-    }
-
-    static async getAuthToken() {
-        return SecureStore.getItemAsync(this.AUTH_TOKEN_KEY);
-    }
-
-    static async clearAuthToken() {
-        return SecureStore.deleteItemAsync(this.AUTH_TOKEN_KEY);
-    }
-
-    static async createMasterKeyMaterial(password: string): Promise<{
-        key: Uint8Array<ArrayBufferLike>,
-        kek: {
-            kek: Uint8Array<ArrayBufferLike>;
-            salt: Uint8Array<ArrayBufferLike>;
-        },
-        encryptedKey: {
-            encryptedMasterKey: Uint8Array<ArrayBufferLike>;
-            nonce: Uint8Array<ArrayBufferLike>;
+    static generateKeyMaterial(password: string): CombinedKeyMaterial {
+        const kekMaterial = Crypto.generateKek(password);
+        const masterKeyMaterial = this.generateMasterKeyMaterial(kekMaterial);
+        const keyPairMaterial = this.generateKeyPairMaterial(kekMaterial);
+        return {
+            kekMaterial,
+            masterKeyMaterial,
+            keyPairMaterial
         }
-    }> {
-        const key = await Crypto.generateEncryptionKey();
-        const kek = await Crypto.generateKek(password);
-        const encryptedKey = await Crypto.encryptMasterKey(key, kek.kek);
-        const masterKey: MasterKeyMaterial = { // tbd, should we base64 encode the unsigned arrays? Will any data loss occur on marshall/unmarshall?
-            key,
-            kek,
-            encryptedKey
+    }
+
+    static generateMasterKeyMaterial(kekMaterial: KekMaterial) {
+        const masterKey = Crypto.generateEncryptionKey();
+        const encryptedKeyMaterial = Crypto.encryptKey(masterKey, kekMaterial.kek);
+        return {
+            plainText: masterKey,
+            encrypted: encryptedKeyMaterial.encryptedKey,
+            nonce: encryptedKeyMaterial.nonce
         }
-        await this.storeMasterKeyMaterial(masterKey);
-        return masterKey;
     }
 
-    static async storeMasterKeyMaterial(masterKey: MasterKeyMaterial) {
-        return SecureStore.setItemAsync(this.MASTERKEY, JSON.stringify(masterKey));
-    }
-
-    static async getMasterKeyMaterial() {
-        return SecureStore.getItemAsync(this.MASTERKEY);
-    }
-
-    static async clearMasterKeyMaterial() {
-        return SecureStore.deleteItemAsync(this.MASTERKEY);
+    static generateKeyPairMaterial(kekMaterial: KekMaterial) {
+        const keyPair = Crypto.generateKeyPair();
+        const encryptedPrivateKey = Crypto.encryptKey(keyPair.privateKey, kekMaterial.kek);
+        return {
+            keyPair,
+            encryptedPrivateKey
+        }
     }
 
     static async logout() {
-        await this.clearAuthToken();
-        await this.clearMasterKeyMaterial();
+        await SecureStore.deleteItemAsync(this.AUTH_TOKEN);
+        await SecureStore.deleteItemAsync(this.MASTERKEY);
+        await SecureStore.deleteItemAsync(this.KEYPAIR);
     }
 
     static async login(email: string, password: string) {
@@ -105,40 +109,50 @@ export default class Auth {
         const response = await SpacedApi.login(email, password);
         const data = await response.json();
 
-        console.log(data);
-
         if (!data.token) {
             throw new Error('Token was not provided by login endpoint.');
-        }        
-        await this.storeAuthToken(data.token);
+        }
+
+        await SecureStore.setItemAsync(this.AUTH_TOKEN, data.token);
 
         // get keys from backend
-        const keysResponse = await SpacedApi.getKeys();
+        const keysResponse = await SpacedApi.getKeys(data.token);
         const encryptedKeyMaterial: GetKeysData = await keysResponse.json();
 
         // convert base64 strings to unsigned arrays
         const encryptedMasterKey = this.base64ToUint8Array(encryptedKeyMaterial.data.encryptedMasterKey);
         const kekSalt = this.base64ToUint8Array(encryptedKeyMaterial.data.kekSalt);
         const masterKeyNonce = this.base64ToUint8Array(encryptedKeyMaterial.data.masterKeyNonce);
-        
-        // re-generate key encryption key using users password
-        const kek = await Crypto.generateKek(password, kekSalt);
+        const encryptedPrivateKey = this.base64ToUint8Array(encryptedKeyMaterial.data.encryptedPrivateKey);
+        const privateKeyNonce = this.base64ToUint8Array(encryptedKeyMaterial.data.privateKeyNonce);
+        const publicKey = this.base64ToUint8Array(encryptedKeyMaterial.data.publicKey);
 
-        // decrypt master key
-        const masterKey = await Crypto.decryptMasterKey(encryptedMasterKey, masterKeyNonce, kek.kek);
-        const masterKeyMaterial: MasterKeyMaterial = {
-            key: masterKey,
-            kek,
-            encryptedKey: {
-                encryptedMasterKey,
+        // re-generate key encryption key using users password
+        const kekMaterial = Crypto.generateKek(password, kekSalt);
+
+        const masterKey = Crypto.decryptKey(encryptedMasterKey, masterKeyNonce, kekMaterial.kek);
+        const privateKey = Crypto.decryptKey(encryptedPrivateKey, privateKeyNonce, kekMaterial.kek);
+        const keyMaterial: CombinedKeyMaterial = {
+            kekMaterial,
+            masterKeyMaterial: {
+                plainText: masterKey,
+                encrypted: encryptedMasterKey,
                 nonce: masterKeyNonce
+            },
+            keyPairMaterial: {
+                keyPair: {
+                    publicKey,
+                    privateKey
+                },
+                encryptedPrivateKey: {
+                    encryptedKey: encryptedPrivateKey,
+                    nonce: privateKeyNonce
+                }
             }
         };
-
-        console.log(masterKeyMaterial);
-
-        // store master key
-        await this.storeMasterKeyMaterial(masterKeyMaterial);
+        await SecureStore.setItemAsync(this.MASTERKEY, JSON.stringify(keyMaterial.masterKeyMaterial));
+        await SecureStore.setItemAsync(this.KEYPAIR, JSON.stringify(keyMaterial.keyPairMaterial));
+        await SecureStore.setItemAsync(this.KEK, JSON.stringify(keyMaterial.kekMaterial));
     }
 
     private static base64ToUint8Array(base64: string): Uint8Array {
