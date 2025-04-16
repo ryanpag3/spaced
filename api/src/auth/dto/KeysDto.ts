@@ -15,5 +15,17 @@ export class KeysDto {
     @IsString()
     @Expose()
     readonly masterKeyNonce: string;
+
+    @IsString()
+    @Expose()
+    readonly privateKeyNonce: string;
+
+    @IsString()
+    @Expose()
+    readonly encryptedPrivateKey: string;
+
+    @IsString()
+    @Expose()
+    readonly publicKey: string;
     
 }

@@ -1,14 +1,22 @@
 import Sodium from 'react-native-libsodium';
-import * as SecureStore from 'expo-secure-store';
 
+export type KekMaterial = {
+    kek: Uint8Array<ArrayBufferLike>,
+    salt: Uint8Array<ArrayBufferLike>
+};
+
+export type KeyMaterial = {
+    encryptedKey: Uint8Array<ArrayBufferLike>,
+    nonce: Uint8Array<ArrayBufferLike>
+};
 
 export default class Crypto {
 
-    static async generateEncryptionKey(lenBytes: number = 32): Promise<Uint8Array> {
+    static generateEncryptionKey(lenBytes: number = 32): Uint8Array {
         return Sodium.randombytes_buf(lenBytes);
     }
 
-    static async generateKek(password: string, salt?: Uint8Array) {
+    static generateKek(password: string, salt?: Uint8Array): KekMaterial {
         salt = salt ? salt : Sodium.randombytes_buf(Sodium.crypto_pwhash_SALTBYTES);
         const kek = Sodium.crypto_pwhash(
             32,
@@ -24,16 +32,20 @@ export default class Crypto {
         };
     }
 
-    static async encryptMasterKey(masterKey: Uint8Array, kek: Uint8Array) {
+    static generateKeyPair(): Sodium.KeyPair {
+        return Sodium.crypto_box_keypair();
+    }
+
+    static encryptKey(key: Uint8Array, kek: Uint8Array): KeyMaterial {
         const nonce = Sodium.randombytes_buf(Sodium.crypto_secretbox_NONCEBYTES);
-        const encryptedMasterKey = Sodium.crypto_secretbox_easy(masterKey, nonce, kek);
+        const encryptedKey = Sodium.crypto_secretbox_easy(key, nonce, kek);
         return {
-            encryptedMasterKey,
+            encryptedKey,
             nonce
         };
     }
 
-    static async decryptMasterKey(encryptedMasterKey: Uint8Array, nonce: Uint8Array, kek: Uint8Array) {
+    static decryptKey(encryptedMasterKey: Uint8Array, nonce: Uint8Array, kek: Uint8Array) {
         return Sodium.crypto_secretbox_open_easy(encryptedMasterKey, nonce, kek);
     }
 }

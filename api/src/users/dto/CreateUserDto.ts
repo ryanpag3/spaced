@@ -16,6 +16,12 @@ export class CreateUserDto {
     password: string;
 
     @IsString()
+    publicKey: string;
+
+    @IsString()
+    encryptedPrivateKey: string;
+
+    @IsString()
     encryptedMasterKey: string;
 
     @IsString()
@@ -23,4 +29,7 @@ export class CreateUserDto {
 
     @IsString()
     masterKeyNonce: string;
+
+    @IsString()
+    privateKeyNonce: string;
 }

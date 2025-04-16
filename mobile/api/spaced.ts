@@ -1,16 +1,19 @@
-import Auth from '@/lib/auth';
 import Config from 'react-native-config';
 
+export type SignUpBody = {
+    username: string;
+    email: string;
+    password: string;
+    encryptedMasterKey: string;
+    encryptedPrivateKey: string;
+    kekSalt: string;
+    masterKeyNonce: string;
+    privateKeyNonce: string;
+    publicKey: string;
+}
+
 export default class SpacedApi {
-    static async signUp(username: string, email: string, password: string, encryptedMasterKey: string, kekSalt: string, masterKeyNonce: string) {
-        const body = {
-            username,
-            email,
-            password,
-            encryptedMasterKey,
-            kekSalt,
-            masterKeyNonce
-        }
+    static async signUp(body: SignUpBody) {
         return fetch(`${Config.API_URL}/auth/signup`, {
             method: 'POST',
             headers: {
@@ -34,8 +37,7 @@ export default class SpacedApi {
         });
     }
 
-    static async getKeys() {
-        const token = await Auth.getAuthToken();
+    static async getKeys(token: string) {
         return fetch(`${Config.API_URL}/auth/keys`, {
             method: 'GET',
             headers: {
