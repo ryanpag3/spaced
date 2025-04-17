@@ -53,7 +53,7 @@ export default function SignUp() {
     if (validateForm()) {
       try {
         await signUp(username, email, password);
-        router.replace("/");
+        router.replace("/(app)/(tabs)/home");
       } catch (e) {
         console.log(e);
         setError('An error occurred');

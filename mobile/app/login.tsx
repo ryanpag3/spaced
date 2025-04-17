@@ -40,7 +40,7 @@ export default function Login() {
       // Handle form submission
       try {
         await signIn(email, password);
-        router.replace("/");
+        router.replace("/(app)/(tabs)/home");
       } catch (e) {
         console.log(e);
         setError('An error occurred');

@@ -19,6 +19,7 @@ export {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
 
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -41,22 +42,18 @@ export default function RootLayout() {
   }
 
   return (
-    <RootLayoutNav />
-  );
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaProvider>
         <AuthProvider>
           <SelectedAlbumsProvider>
-            <Slot />
+            <RootLayoutNav />
           </SelectedAlbumsProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>
   );
+}
+
+function RootLayoutNav() {
+  return <Slot />;
 }
