@@ -96,6 +96,7 @@ export default function GalleryGrid() {
 
   return (
     <FlatList
+      style={styles.list}
       data={assets}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
@@ -109,6 +110,10 @@ export default function GalleryGrid() {
 }
 
 const styles = StyleSheet.create({
+  list: {
+    width: '100%',
+    height: '100%'
+  },
   tile: {
     width: tileSize,
     height: tileSize,
