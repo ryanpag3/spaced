@@ -1,12 +1,10 @@
 import GalleryGrid from '@/components/GalleryGrid';
-import { Text } from '@/components/Themed';
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { useNavigation } from 'expo-router';
 import { useEffect } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackNavigationOptions } from '@react-navigation/native-stack'
 import { Button, View } from 'react-native';
 
-export default function Submit() {
+export default function SelectMediaStep() {
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -19,7 +17,6 @@ export default function Submit() {
       headerRight: () => (
         <Button title="Next"/>
       )
-
   } satisfies NativeStackNavigationOptions);
   }, [navigation]);
 

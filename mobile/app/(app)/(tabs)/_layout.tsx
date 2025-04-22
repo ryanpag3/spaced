@@ -52,11 +52,7 @@ export default function AuthenticatedLayout() {
             <TouchableOpacity
               {...props as any}
               onPress={() => {
-                router.push("/(app)/submit", 
-                  {
-                    
-                  }
-                );
+                router.push("/submit/SelectMediaStep");
               }}
             />
           )
