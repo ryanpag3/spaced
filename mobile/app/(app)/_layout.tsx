@@ -1,29 +1,21 @@
-import { useAuth } from '@/components/useAuth';
-import { Redirect, Stack, Tabs } from 'expo-router';
 import { Text } from '@/components/Themed';
+import { useAuth } from '@/components/useAuth';
+import { Redirect, Stack } from 'expo-router';
 
-export default function AuthenticatedLayout() {
+export default function AppLayout() {
     const { isAuthenticated, loading } = useAuth();
 
     if (loading) {
-        return <Text>Loading...</Text>
-    }
+        return <Text>Loading</Text>
+    };
 
     if (!isAuthenticated) {
-        return <Redirect href="/login"/>
+        return <Redirect href="/login" />
     }
 
-    return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-                tabBarStyle: {
-                    display: 'flex',
-                },
-            }}
-        >
-            <Tabs.Screen name="index" options={{ title: 'Home' }} />
-            <Tabs.Screen name="library" options={{ title: 'Library' }} />
-        </Tabs>
-    )
+    return <Stack
+        screenOptions={{
+            headerShown: false
+        }}
+    />
 }

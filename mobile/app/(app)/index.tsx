@@ -1,12 +1,12 @@
-import { View, Text, Button } from '@/components/Themed';
-import { useAuth } from '@/components/useAuth';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRootNavigationState, Redirect } from 'expo-router';
 
-export default function Index() {
-    const { signOut } = useAuth();
-    return (
-        <SafeAreaView>
-           <Button onPress={signOut}>Logout</Button> 
-        </SafeAreaView>
-    )
+
+export default function InitalRouting() {
+  const rootNavigationState = useRootNavigationState();
+
+
+  if (!rootNavigationState?.key) return null;
+
+
+  return <Redirect href={'/(app)/(tabs)/home'} />
 }

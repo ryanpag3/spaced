@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkAuthState = async () => {
         try {
-            const token = await SecureStore.getItemAsync('userToken');
+            const token = await SecureStore.getItemAsync('auth.token');
             if (token) {
                 setIsAuthenticated(true);
             } else {
