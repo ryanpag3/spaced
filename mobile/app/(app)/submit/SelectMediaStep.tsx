@@ -1,27 +1,27 @@
 import GalleryGrid from '@/components/GalleryGrid';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { Asset } from 'expo-media-library';
 import { useNavigation, useRouter } from 'expo-router';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { Alert, Button, View } from 'react-native';
 
 export default function SelectMediaStep() {
   const navigation = useNavigation();
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
 
   const onNextPushed = useCallback(() => {
-    console.log(selectedIds);
-    if (selectedIds.length === 0) {
+    if (selectedAssets.length === 0) {
       Alert.alert("You must select at least one photo or video.");
       return;
     }
     router.push({
       pathname: "/submit/SubmitPostStep",
       params: {
-        selectedIds: JSON.stringify([...selectedIds])
+        selectedAssets: JSON.stringify([...selectedAssets])
       }
     })
-  }, [selectedIds, router]);
+  }, [selectedAssets, router]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -38,7 +38,7 @@ export default function SelectMediaStep() {
 
   return (
     <View>
-      <GalleryGrid onSelectedIdsChanged={(selectedIds) => setSelectedIds([...selectedIds])} />
+      <GalleryGrid onSelectedAssetsChanged={(selected) => setSelectedAssets([...selected])} />
     </View>
   )
 }

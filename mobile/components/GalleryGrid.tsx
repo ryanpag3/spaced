@@ -10,14 +10,14 @@ const screenWidth = Dimensions.get('window').width;
 const tileSize = screenWidth / numColumns;
 
 export default function GalleryGrid({
-  onSelectedIdsChanged
-}: { onSelectedIdsChanged: (selectedIds: Set<string>) => void }) {
+  onSelectedAssetsChanged
+}: { onSelectedAssetsChanged: (assets: MediaLibrary.Asset[]) => void }) {
   const [assets, setAssets] = useState<MediaLibrary.Asset[]>([]);
   const [hasPermission, setHasPermission] = useState(false);
   const [loading, setLoading] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<{[id: string]: MediaLibrary.Asset}>({});
 
   useEffect(() => {
     (async () => {
@@ -27,10 +27,6 @@ export default function GalleryGrid({
       await loadMore();
     })()
   }, []);
-
-  useEffect(() => {
-    onSelectedIdsChanged(selectedIds);
-  }, [ selectedIds ]);
 
   const loadMore = async () => {
     if (!hasMore || loading) return;
@@ -48,22 +44,23 @@ export default function GalleryGrid({
     setLoading(false);
   }
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    })
+  const toggleSelect = (asset: MediaLibrary.Asset) => {
+    if (selected[asset.id]) {
+      delete selected[asset.id];
+    } else {
+      selected[asset.id] = asset;
+    }
+    setSelected({...selected});
+    onSelectedAssetsChanged(Object.values(selected));
   };
 
   const renderItem = ({ item }: { item: MediaLibrary.Asset }) => {
-    const isSelected = selectedIds.has(item.id);
+    const isSelected = selected[item.id] !== undefined;
     return (
       <TouchableOpacity
         style={styles.tile}
         activeOpacity={0.8}
-        onPress={() => toggleSelect(item.id)}
+        onPress={() => toggleSelect(item)}
       >
         <Image source={{ uri: item.uri }} style={styles.image} />
 
