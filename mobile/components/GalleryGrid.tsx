@@ -9,7 +9,9 @@ const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const tileSize = screenWidth / numColumns;
 
-export default function GalleryGrid() {
+export default function GalleryGrid({
+  onSelectedIdsChanged
+}: { onSelectedIdsChanged: (selectedIds: Set<string>) => void }) {
   const [assets, setAssets] = useState<MediaLibrary.Asset[]>([]);
   const [hasPermission, setHasPermission] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,9 +24,13 @@ export default function GalleryGrid() {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') return;
       setHasPermission(true);
-      loadMore();
+      await loadMore();
     })()
-  });
+  }, []);
+
+  useEffect(() => {
+    onSelectedIdsChanged(selectedIds);
+  }, [ selectedIds ]);
 
   const loadMore = async () => {
     if (!hasMore || loading) return;
@@ -36,7 +42,6 @@ export default function GalleryGrid() {
       mediaType: ['photo', 'video'],
       sortBy: [MediaLibrary.SortBy.creationTime]
     });
-
     setAssets((prev) => [...prev, ...page.assets]);
     setEndCursor(page.endCursor);
     setHasMore(page.hasNextPage);
@@ -52,7 +57,7 @@ export default function GalleryGrid() {
     })
   };
 
-  const renderItem = ({ item}: { item: MediaLibrary.Asset }) => {
+  const renderItem = ({ item }: { item: MediaLibrary.Asset }) => {
     const isSelected = selectedIds.has(item.id);
     return (
       <TouchableOpacity
@@ -60,7 +65,7 @@ export default function GalleryGrid() {
         activeOpacity={0.8}
         onPress={() => toggleSelect(item.id)}
       >
-        <Image source={{ uri: item.uri}} style={styles.image}/>
+        <Image source={{ uri: item.uri }} style={styles.image} />
 
         {/* Video play icon */}
         {item.mediaType === 'video' && (
@@ -86,7 +91,7 @@ export default function GalleryGrid() {
     )
   }
 
-  if(!hasPermission) {
+  if (!hasPermission) {
     return (
       <View>
         <Text>Need permission to access media library.</Text>
@@ -103,7 +108,7 @@ export default function GalleryGrid() {
       numColumns={numColumns}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
-      ListFooterComponent={loading ? <ActivityIndicator/> : null}
+      ListFooterComponent={loading ? <ActivityIndicator /> : null}
       showsVerticalScrollIndicator={false}
     />
   )
