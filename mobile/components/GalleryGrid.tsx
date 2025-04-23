@@ -9,22 +9,24 @@ const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const tileSize = screenWidth / numColumns;
 
-export default function GalleryGrid() {
+export default function GalleryGrid({
+  onSelectedAssetsChanged
+}: { onSelectedAssetsChanged: (assets: MediaLibrary.Asset[]) => void }) {
   const [assets, setAssets] = useState<MediaLibrary.Asset[]>([]);
   const [hasPermission, setHasPermission] = useState(false);
   const [loading, setLoading] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<{[id: string]: MediaLibrary.Asset}>({});
 
   useEffect(() => {
     (async () => {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') return;
       setHasPermission(true);
-      loadMore();
+      await loadMore();
     })()
-  });
+  }, []);
 
   const loadMore = async () => {
     if (!hasMore || loading) return;
@@ -36,31 +38,31 @@ export default function GalleryGrid() {
       mediaType: ['photo', 'video'],
       sortBy: [MediaLibrary.SortBy.creationTime]
     });
-
     setAssets((prev) => [...prev, ...page.assets]);
     setEndCursor(page.endCursor);
     setHasMore(page.hasNextPage);
     setLoading(false);
   }
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    })
+  const toggleSelect = (asset: MediaLibrary.Asset) => {
+    if (selected[asset.id]) {
+      delete selected[asset.id];
+    } else {
+      selected[asset.id] = asset;
+    }
+    setSelected({...selected});
+    onSelectedAssetsChanged(Object.values(selected));
   };
 
-  const renderItem = ({ item}: { item: MediaLibrary.Asset }) => {
-    const isSelected = selectedIds.has(item.id);
+  const renderItem = ({ item }: { item: MediaLibrary.Asset }) => {
+    const isSelected = selected[item.id] !== undefined;
     return (
       <TouchableOpacity
         style={styles.tile}
         activeOpacity={0.8}
-        onPress={() => toggleSelect(item.id)}
+        onPress={() => toggleSelect(item)}
       >
-        <Image source={{ uri: item.uri}} style={styles.image}/>
+        <Image source={{ uri: item.uri }} style={styles.image} />
 
         {/* Video play icon */}
         {item.mediaType === 'video' && (
@@ -86,7 +88,7 @@ export default function GalleryGrid() {
     )
   }
 
-  if(!hasPermission) {
+  if (!hasPermission) {
     return (
       <View>
         <Text>Need permission to access media library.</Text>
@@ -103,7 +105,7 @@ export default function GalleryGrid() {
       numColumns={numColumns}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
-      ListFooterComponent={loading ? <ActivityIndicator/> : null}
+      ListFooterComponent={loading ? <ActivityIndicator /> : null}
       showsVerticalScrollIndicator={false}
     />
   )

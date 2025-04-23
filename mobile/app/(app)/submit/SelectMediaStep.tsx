@@ -1,13 +1,29 @@
 import GalleryGrid from '@/components/GalleryGrid';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { useNavigation } from 'expo-router';
-import { useEffect } from 'react';
-import { Button, View } from 'react-native';
+import { Asset } from 'expo-media-library';
+import { useNavigation, useRouter } from 'expo-router';
+import { useCallback, useLayoutEffect, useState } from 'react';
+import { Alert, Button, View } from 'react-native';
 
 export default function SelectMediaStep() {
   const navigation = useNavigation();
+  const router = useRouter();
+  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
 
-  useEffect(() => {
+  const onNextPushed = useCallback(() => {
+    if (selectedAssets.length === 0) {
+      Alert.alert("You must select at least one photo or video.");
+      return;
+    }
+    router.push({
+      pathname: "/submit/SubmitPostStep",
+      params: {
+        selectedAssets: JSON.stringify([...selectedAssets])
+      }
+    })
+  }, [selectedAssets, router]);
+
+  useLayoutEffect(() => {
     navigation.setOptions({
       animation: 'slide_from_left',
       animationMatchesGesture: true,
@@ -15,14 +31,14 @@ export default function SelectMediaStep() {
       headerBackTitle: 'Back',
       title: 'Select Media',
       headerRight: () => (
-        <Button title="Next"/>
+        <Button title="Next" onPress={onNextPushed} />
       )
-  } satisfies NativeStackNavigationOptions);
-  }, [navigation]);
+    } satisfies NativeStackNavigationOptions);
+  }, [navigation, onNextPushed]);
 
   return (
     <View>
-      <GalleryGrid/>
+      <GalleryGrid onSelectedAssetsChanged={(selected) => setSelectedAssets([...selected])} />
     </View>
   )
 }
