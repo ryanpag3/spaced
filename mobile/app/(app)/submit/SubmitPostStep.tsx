@@ -1,9 +1,10 @@
+import SpacedApi from '@/api/spaced';
+import Auth from '@/lib/auth';
+import { Image } from 'expo-image';
 import { Asset } from 'expo-media-library';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Dimensions, FlatList, KeyboardAvoidingView, Text, TextInput, View, NativeSyntheticEvent, NativeScrollEvent, ActivityIndicator, Platform, Button } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
-import { Image } from 'expo-image';
+import { useRef, useState } from 'react';
+import { Button, Dimensions, FlatList, KeyboardAvoidingView, NativeScrollEvent, NativeSyntheticEvent, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -12,6 +13,8 @@ export default function SubmitPostStep() {
   const params = useLocalSearchParams<{ selectedAssets: string }>();
   const selectedAssets = JSON.parse(params.selectedAssets ?? "[]");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [description, setDescription] = useState<string|undefined>();
+  const [tags, setTags] = useState<string|undefined>();
   const listRef = useRef<FlatList<Asset>>(null);
 
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -19,7 +22,17 @@ export default function SubmitPostStep() {
     setCurrentIndex(idx);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const token = await Auth.getToken();
+
+    const body = {
+      description,
+      tags: tags?.split(',') ?? []
+    };
+    console.log(body);
+    const result = await SpacedApi.createPost(token as string, body);
+    console.log(result);
+//    console.log(JSON.stringify(selectedAssets, null, 4));
     // do something
   }
 
@@ -64,11 +77,15 @@ export default function SubmitPostStep() {
       <View style={styles.form}>
         <Text style={styles.label}>Description</Text>
         <TextInput
+          value={description}
+          onChangeText={(text) => setDescription(text)}
           style={styles.input}
           placeholder="Add a description..."
         />
         <Text style={[styles.label, { marginTop: 16 }]}>Tags</Text>
         <TextInput
+          value={tags}
+          onChangeText={(text) => setTags(text)}
           style={styles.input}
           placeholder="Add tags, separated by commas"
         />

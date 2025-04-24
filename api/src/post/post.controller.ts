@@ -5,7 +5,7 @@ import CreatePostDto from './dto/CreatePostDto';
 import { PostService } from './post.service';
 import { AuthenticatedRequest } from 'src/common/types/request.type';
 
-@Controller('post')
+@Controller('posts')
 export class PostController {
   private postService: PostService;
   private tagService: TagsService;

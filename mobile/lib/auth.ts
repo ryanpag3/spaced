@@ -159,4 +159,8 @@ export default class Auth {
         return Uint8Array.from(Buffer.from(base64, 'base64'));
     }
 
+    static getToken() {
+        return SecureStore.getItemAsync(this.AUTH_TOKEN);
+    }
+
 }
