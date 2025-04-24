@@ -10,7 +10,7 @@ export class PostService {
         })
     }
 
-    async get(id: string) {
+    async findById(id: string) {
         return prisma.post.findUnique({
             where: {
                 id

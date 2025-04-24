@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { MediaService } from './media.service';
 import { AuthenticatedRequest } from 'src/common/types/request.type';
@@ -13,8 +13,9 @@ export class MediaController {
     private readonly mediaService: MediaService;
     private readonly postService: PostService;
 
-    constructor(mediaService: MediaService) {
+    constructor(mediaService: MediaService, postService: PostService) {
         this.mediaService = mediaService;
+        this.postService = postService;
     }
 
     @Post(":fileName")
@@ -22,23 +23,15 @@ export class MediaController {
         const { fileName } = request.params;
         const { post } = request.query;
 
-        const media = await this.mediaService.upload(request.user.id, post as string, fileName, request);
+        const postRecord = await this.postService.findById(post as string);
+        if (!postRecord || postRecord.authorId !== request.user.id) { // this will need to be changed if we ever add collaborative posts
+            throw new BadRequestException("This media can not be uploaded for the specified post.");
+        }
 
+        const media = await this.mediaService.upload(request.user.id, post as string, fileName, request);
         return {
             id: media.id,
             key: media.s3Key
         }
     }
-
-    // @Get("/:id")
-    // async download(@Req() request: Request, @Res() response: Response) {
-    //     const id = request.params.id;
-    //     const { data, key, iv, algorithm } = await this.mediaService.download(id);
-    //     data.body.pipe(response);
-    //     response.setHeader('x-encryption-key', key);
-    //     response.setHeader('x-encryption-iv', iv);
-    //     response.setHeader('x-encryption-algorithm', algorithm);
-    //     return response;
-    // }
-
 }
