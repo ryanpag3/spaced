@@ -17,16 +17,17 @@ export class MediaController {
         this.mediaService = mediaService;
     }
 
-    @Post("/:postId/:fileName")
+    @Post(":fileName")
     async upload(@Req() request: AuthenticatedRequest) {
-        const { postId, fileName } = request.params;
-        const key = `/${request.user.id}/${postId}/${fileName}`;
-        await this.mediaService.upload(key, request);
-        
+        const { fileName } = request.params;
+        const { post } = request.query;
 
+        const media = await this.mediaService.upload(request.user.id, post as string, fileName, request);
 
-        // upload the media
-        // update the post with the reference to media
+        return {
+            id: media.id,
+            key: media.s3Key
+        }
     }
 
     // @Get("/:id")

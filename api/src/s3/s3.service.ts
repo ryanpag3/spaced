@@ -42,6 +42,7 @@ export class S3Service {
      * @param key - The key to store the file under.
      */
     async upload(body: PassThrough, key: string): Promise<PutObjectCommandOutput> {
+        Logger.debug(`Uploading file to s3key ${key} for bucket ${process.env.S3_BUCKET_NAME}`);
         const parallelUpload = new Upload({
             client: this.client,
             params: {
