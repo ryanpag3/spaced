@@ -14,25 +14,41 @@ datasource db {
 }
 
 model User {
-  id                  String   @id @default(uuid())
-  username            String   @unique
-  email               String   @unique
-  password            String
-  publicKey           String?
-  encryptedPrivateKey String?
-  privateKeyNonce     String?
-  encryptedMasterKey  String?
-  kekSalt             String?
-  masterKeyNonce      String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+}
+
+model Post {
+  id          String  @id @default(uuid())
+  description String?
+  author      User    @relation(fields: [authorId], references: [id])
+  authorId    String
+  tags        Tag[]   @relation("PostTags")
+  media       Media[]
 }
 
 model Media {
-  id            String   @id @default(uuid())
-  encryptionKey String
-  iv            String
-  algorithm     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String    @id @default(uuid())
+  post      Post      @relation(fields: [postId], references: [id])
+  postId    String
+  type      MediaType
+  s3Key     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+  posts Post[] @relation("PostTags")
 }

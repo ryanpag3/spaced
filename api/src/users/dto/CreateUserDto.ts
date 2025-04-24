@@ -15,21 +15,4 @@ export class CreateUserDto {
     @IsString()
     password: string;
 
-    @IsString()
-    publicKey: string;
-
-    @IsString()
-    encryptedPrivateKey: string;
-
-    @IsString()
-    encryptedMasterKey: string;
-
-    @IsString()
-    kekSalt: string;
-
-    @IsString()
-    masterKeyNonce: string;
-
-    @IsString()
-    privateKeyNonce: string;
 }
