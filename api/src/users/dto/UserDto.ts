@@ -21,27 +21,4 @@ export class UserDto {
     @MinLength(6)
     password: string;
 
-    @IsString()
-    @Expose()
-    encryptedPrivateKey: string;
-
-    @IsString()
-    @Expose()
-    publicKey: string;
-
-    @IsString()
-    @Expose()
-    encryptedMasterKey: string;
-
-    @IsString()
-    @Expose()
-    kekSalt: string;
-
-    @IsString()
-    @Expose()
-    masterKeyNonce: string;
-
-    @IsString()
-    @Expose()
-    privateKeyNonce: string;
 }
