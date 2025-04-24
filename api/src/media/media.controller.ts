@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { MediaService } from './media.service';
+import { AuthenticatedRequest } from 'src/common/types/request.type';
+import { PostService } from 'src/post/post.service';
 
 
 @Controller({
@@ -9,22 +11,23 @@ import { MediaService } from './media.service';
 })
 export class MediaController {
     private readonly mediaService: MediaService;
+    private readonly postService: PostService;
 
     constructor(mediaService: MediaService) {
         this.mediaService = mediaService;
     }
 
-    // @Post()
-    // async upload(@Req() request: Request) {
-    //     const headers = this.mediaService.parseHeaders(request.headers);
-    //     const res = await this.mediaService.upload(
-    //         headers.key,
-    //         headers.iv,
-    //         headers.algorithm,
-    //         request
-    //     );
-    //     return res;
-    // }
+    @Post("/:postId/:fileName")
+    async upload(@Req() request: AuthenticatedRequest) {
+        const { postId, fileName } = request.params;
+        const key = `/${request.user.id}/${postId}/${fileName}`;
+        await this.mediaService.upload(key, request);
+        
+
+
+        // upload the media
+        // update the post with the reference to media
+    }
 
     // @Get("/:id")
     // async download(@Req() request: Request, @Res() response: Response) {

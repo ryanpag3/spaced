@@ -17,26 +17,11 @@ export class MediaService {
 
     async upload(
         key: string,
-        iv: string,
-        algorithm: string,
         data: Readable
     ) {
-        // // store metadata
-        // const response = await prisma.media.create({
-        //     data: {
-        //         encryptionKey: key,
-        //         iv,
-        //         algorithm
-        //     }
-        // });
-        
-        // // store data
-        // const passthru = new PassThrough();
-        // data.pipe(passthru);
-        // await this.s3Service.upload(passthru, response.id);
-        // return {
-        //     id: response.id
-        // }
+        // todo
+        // - upload file to s3
+        // - create media record in database
     }
 
     parseHeaders(headers: IncomingHttpHeaders) {
