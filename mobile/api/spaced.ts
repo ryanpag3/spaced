@@ -4,12 +4,12 @@ export type SignUpBody = {
     username: string;
     email: string;
     password: string;
-    encryptedMasterKey: string;
-    encryptedPrivateKey: string;
-    kekSalt: string;
-    masterKeyNonce: string;
-    privateKeyNonce: string;
-    publicKey: string;
+    // encryptedMasterKey: string;
+    // encryptedPrivateKey: string;
+    // kekSalt: string;
+    // masterKeyNonce: string;
+    // privateKeyNonce: string;
+    // publicKey: string;
 }
 
 export default class SpacedApi {
