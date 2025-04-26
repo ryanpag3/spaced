@@ -52,13 +52,13 @@ export default class Auth {
             {
                 username,
                 email,
-                password,
-                encryptedMasterKey: fromByteArray(keyMaterial.masterKeyMaterial.encrypted),
-                kekSalt: fromByteArray(keyMaterial.kekMaterial.salt),
-                masterKeyNonce: fromByteArray(keyMaterial.masterKeyMaterial.nonce),
-                encryptedPrivateKey: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.encryptedKey),
-                privateKeyNonce: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.nonce),
-                publicKey: fromByteArray(keyMaterial.keyPairMaterial.keyPair.publicKey)
+                password
+                // encryptedMasterKey: fromByteArray(keyMaterial.masterKeyMaterial.encrypted),
+                // kekSalt: fromByteArray(keyMaterial.kekMaterial.salt),
+                // masterKeyNonce: fromByteArray(keyMaterial.masterKeyMaterial.nonce),
+                // encryptedPrivateKey: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.encryptedKey),
+                // privateKeyNonce: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.nonce),
+                // publicKey: fromByteArray(keyMaterial.keyPairMaterial.keyPair.publicKey)
             }
         );
         if (result.status !== 201) {

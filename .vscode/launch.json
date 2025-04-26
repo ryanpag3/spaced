@@ -1,25 +1,26 @@
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "name": "Start and Attach: NestJS (yarn start:dev)",
-        "type": "node",
-        "request": "launch",
-        "runtimeExecutable": "yarn",
-        "runtimeArgs": [
-          "start:dev"
-        ],
-        "cwd": "${workspaceFolder}/api",
-        "console": "integratedTerminal",
-        "autoAttachChildProcesses": true,
-        "restart": true,
-        "outputCapture": "std",
-        "env": {
-          "NODE_ENV": "development",
-          "TS_NODE_PROJECT": "tsconfig.build.json"
-        },
-        "skipFiles": ["<node_internals>/**"]
-      }
+        {
+            "name": "Start and Attach: NestJS (yarn start:dev)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "cwd": "${workspaceFolder}/api",
+            "console": "integratedTerminal",
+            "autoAttachChildProcesses": true,
+            "restart": true,
+            "outputCapture": "std",
+            "env": {
+                "NODE_ENV": "development",
+                "TS_NODE_PROJECT": "tsconfig.build.json"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
     ]
-  }
-  
+}
