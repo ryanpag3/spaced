@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TagsModule } from 'src/tag/tag.module';
-import { PostService } from './post.service';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
-    providers: [PostService],
-    imports: [TagsModule],
-    exports: [PostService]
+    imports: [S3Module],
 })
 export class PostModule {}
