@@ -79,7 +79,7 @@ export class PostController {
                 media: {
                     create: uploadedMedia.map((m) => ({
                         s3Key: m.key,
-                        mimeType: files.find(f => f.originalname === m.originalname)?.mimetype ?? ''
+                        mimeType: m.mimetype
                     }))
                 }
             },

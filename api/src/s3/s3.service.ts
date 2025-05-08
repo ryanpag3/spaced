@@ -46,7 +46,8 @@ export class S3Service {
    */
   public async uploadFile(key: string, file: Express.Multer.File): Promise<{
     key: string,
-    originalname: string
+    originalname: string,
+    mimetype: string
   }> {
     await this.client.send(
       new PutObjectCommand({
@@ -59,7 +60,8 @@ export class S3Service {
     Logger.debug(`Uploaded ${file.originalname} to S3 under key ${key}`);
     return {
       key,
-      originalname: file.originalname
+      originalname: file.originalname,
+      mimetype: file.mimetype
     };
   }
 
