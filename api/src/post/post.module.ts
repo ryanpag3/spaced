@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TagsModule } from 'src/tag/tag.module';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
-    imports: [TagsModule]
+    imports: [S3Module],
 })
 export class PostModule {}
