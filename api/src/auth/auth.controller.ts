@@ -1,13 +1,10 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
+import { BadRequestException, Body, ConflictException, Controller, Logger, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'express';
-import { AuthenticatedRequest } from 'src/common/types/request.type';
+import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 import { UserDto } from 'src/users/dto/UserDto';
 import { UsersService } from 'src/users/users.service';
 import Public from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
-import { KeysDto } from './dto/KeysDto';
-import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 
 @Controller('auth')
 export class AuthController {
@@ -51,16 +48,6 @@ export class AuthController {
         }
 
         return this.authService.respondSuccess(res, user.id);
-    }
-
-    @Get('keys')
-    async getKeys(@Req() request: AuthenticatedRequest) {
-        const payload = request.user;
-        const user = await this.usersService.getByPk(payload.id);
-        const keyMaterial = plainToInstance(KeysDto, user);
-        return {
-            data: keyMaterial
-        }
     }
 
 }
