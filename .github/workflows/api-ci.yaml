@@ -34,7 +34,7 @@ jobs:
       - name: Lint (auto-fix)
         if: github.event_name == 'pull_request'
         working-directory: ./api
-        run: yarn lint --fix
+        run: yarn lint
 
       - name: Commit and push lint fixes
         if: github.event_name == 'pull_request'
