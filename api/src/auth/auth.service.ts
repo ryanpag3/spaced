@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
-import * as jwt from 'jsonwebtoken';
-import { UserDto } from 'src/users/dto/UserDto';
 
 @Injectable()
 export class AuthService {
 
-    constructor(private jwtService: JwtService) {}
+    constructor(private jwtService: JwtService) { }
 
     isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
