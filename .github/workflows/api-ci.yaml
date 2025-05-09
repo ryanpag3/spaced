@@ -31,7 +31,25 @@ jobs:
         working-directory: ./api
         run: yarn install --frozen-lockfile
 
-      - name: Lint
+      - name: Lint (auto-fix)
+        if: github.event_name == 'pull_request'
+        working-directory: ./api
+        run: yarn lint --fix
+
+      - name: Commit and push lint fixes
+        if: github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add api
+          if git diff --cached --quiet; then
+            echo "No lint fixes to commit."
+          else
+            git commit -m "chore(lint): auto-fix issues"
+            git push
+          fi
+
+      - name: Lint (verify)
         working-directory: ./api
         run: yarn lint
 
