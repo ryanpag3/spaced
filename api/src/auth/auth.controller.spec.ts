@@ -13,7 +13,7 @@ describe('AuthController', () => {
   //   expect(controller).toBeDefined();
   // });
 
-  it('should test', () => {
+  it('should test 2', () => {
     expect(true).toBe(true);
   });
 });
