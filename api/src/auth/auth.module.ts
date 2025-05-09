@@ -12,15 +12,15 @@ import { AuthGuard } from './auth.guard';
     AuthService,
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
-    }
+      useClass: AuthGuard,
+    },
   ],
   imports: [
     UsersModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET
-    })
+      secret: process.env.JWT_SECRET,
+    }),
   ],
 })
 export class AuthModule {}

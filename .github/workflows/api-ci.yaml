@@ -1,0 +1,64 @@
+name: API CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: api/yarn.lock
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: yarn install --frozen-lockfile
+
+      - name: Lint (auto-fix)
+        if: github.event_name == 'pull_request'
+        working-directory: ./api
+        run: yarn lint
+
+      # Commit all changed files back to the repository
+      - uses: stefanzweifel/git-auto-commit-action@v5
+
+      - name: Lint (verify)
+        working-directory: ./api
+        run: yarn lint
+
+      - name: Run tests
+        working-directory: ./api
+        run: yarn test --ci
+
+      - name: Build app
+        working-directory: ./api
+        run: yarn build
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: api/dist/

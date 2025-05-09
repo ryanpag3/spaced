@@ -10,11 +10,17 @@ import { S3Service } from './s3/s3.service';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: '.env'
-  }), UsersModule, S3Module, AuthModule, PostModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    UsersModule,
+    S3Module,
+    AuthModule,
+    PostModule,
+  ],
   controllers: [AppController, PostController],
   providers: [AppService, S3Service],
 })
-export class AppModule { }
+export class AppModule {}
