@@ -3,9 +3,9 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import { AuthenticatedRequest } from 'src/common/types/request.type';
-import prisma from 'src/db/prisma';
-import { S3Service } from 'src/s3/s3.service';
+import { AuthenticatedRequest } from '../common/types/request.type';
+import prisma from '../db/prisma';
+import { S3Service } from '../s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import CreatePostDto from './dto/CreatePostDto';
 

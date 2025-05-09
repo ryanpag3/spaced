@@ -1,7 +1,7 @@
 import { BadRequestException, Body, ConflictException, Controller, Logger, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'express';
-import { CreateUserDto } from 'src/users/dto/CreateUserDto';
-import { UserDto } from 'src/users/dto/UserDto';
+import { CreateUserDto } from '../users/dto/CreateUserDto';
+import { UserDto } from '../users/dto/UserDto';
 import { UsersService } from 'src/users/users.service';
 import Public from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
