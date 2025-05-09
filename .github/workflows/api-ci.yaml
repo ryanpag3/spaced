@@ -41,12 +41,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${{ github.head_ref }}"
+          git checkout "${{ github.head_ref }}"
           git add api
           if git diff --cached --quiet; then
             echo "No lint fixes to commit."
           else
             git commit -m "chore(lint): auto-fix issues"
-            git push
+            git push origin HEAD:${{ github.head_ref }}
           fi
 
       - name: Lint (verify)
