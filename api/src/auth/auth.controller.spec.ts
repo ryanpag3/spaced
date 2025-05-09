@@ -1,4 +1,3 @@
-
 describe('AuthController', () => {
   // let controller: AuthController;
 
@@ -16,5 +15,5 @@ describe('AuthController', () => {
 
   it('should test', () => {
     expect(true).toBe(true);
-  })
+  });
 });

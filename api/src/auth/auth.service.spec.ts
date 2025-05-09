@@ -1,4 +1,3 @@
-
 describe('AuthService', () => {
   // let service: AuthService;
 
@@ -15,5 +14,5 @@ describe('AuthService', () => {
   // });
   it('should return true', () => {
     expect(true).toBe(true);
-  })
+  });
 });
