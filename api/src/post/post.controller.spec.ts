@@ -1,4 +1,3 @@
-
 describe('PostController', () => {
   // let controller: PostController;
 
@@ -16,5 +15,5 @@ describe('PostController', () => {
 
   it('should return true 2', () => {
     expect(true).toBe(true);
-  })
+  });
 });
