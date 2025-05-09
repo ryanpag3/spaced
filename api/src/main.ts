@@ -13,14 +13,15 @@ async function bootstrap() {
     .setTitle('Spaced API')
     .setDescription('API endpoints for Spaced functionality.')
     .setVersion('1.0-alpha')
-    .build()
-  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+    .build();
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
 
   app.useGlobalPipes(
     new ValidationPipe({
-      enableDebugMessages: true
-    })
+      enableDebugMessages: true,
+    }),
   );
 
   await app.listen(process.env.PORT ?? 3000);

@@ -1,4 +1,10 @@
-import { CreateBucketCommand, DeleteObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  CreateBucketCommand,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -9,28 +15,35 @@ export class S3Service {
     this.client = new S3Client({
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
       endpoint: process.env.S3_ENDPOINT,
       forcePathStyle: true,
-      region: process.env.S3_REGION
+      region: process.env.S3_REGION,
     });
     this.ensureBucketExists();
   }
 
   async ensureBucketExists(): Promise<void> {
     try {
-      await this.client.send(new HeadBucketCommand({
-        Bucket: process.env.S3_BUCKET_NAME,
-      }));
+      await this.client.send(
+        new HeadBucketCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+        }),
+      );
     } catch (error) {
       if (error.name === 'NotFound') {
         try {
-          await this.client.send(new CreateBucketCommand({
-            Bucket: process.env.S3_BUCKET_NAME,
-          }));
+          await this.client.send(
+            new CreateBucketCommand({
+              Bucket: process.env.S3_BUCKET_NAME,
+            }),
+          );
         } catch (e) {
-          Logger.debug('An error was thrown while trying to create bucket. This is probably benign, but logging here for posterity.', e);
+          Logger.debug(
+            'An error was thrown while trying to create bucket. This is probably benign, but logging here for posterity.',
+            e,
+          );
         }
       } else {
         // noop
@@ -42,26 +55,29 @@ export class S3Service {
    * Upload a file to the specified key.
    * @param key - The unique key where the file is stored in the S3 bucket.
    * @param file - The file to upload.
-   * @returns 
+   * @returns
    */
-  public async uploadFile(key: string, file: Express.Multer.File): Promise<{
+  public async uploadFile(
     key: string,
-    originalname: string,
-    mimetype: string
+    file: Express.Multer.File,
+  ): Promise<{
+    key: string;
+    originalname: string;
+    mimetype: string;
   }> {
     await this.client.send(
       new PutObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME,
         Key: key,
         Body: file.buffer,
-        ContentType: file.mimetype
-      })
+        ContentType: file.mimetype,
+      }),
     );
     Logger.debug(`Uploaded ${file.originalname} to S3 under key ${key}`);
     return {
       key,
       originalname: file.originalname,
-      mimetype: file.mimetype
+      mimetype: file.mimetype,
     };
   }
 
@@ -69,8 +85,8 @@ export class S3Service {
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME,
-        Key: key
-      })
+        Key: key,
+      }),
     );
     Logger.debug(`Deleted file from S3 with key ${key}`);
   }
