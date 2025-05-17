@@ -22,14 +22,14 @@ describe('AuthController', () => {
           useValue: {
             hashPassword: jest.fn(),
             isAuthorized: jest.fn(),
-            respondSuccess: jest.fn()
+            respondSuccess: jest.fn(),
           },
         },
         {
           provide: UsersService,
           useValue: {
             create: jest.fn(),
-            getAuthDetails: jest.fn()
+            getAuthDetails: jest.fn(),
           },
         },
       ],
@@ -39,7 +39,7 @@ describe('AuthController', () => {
     authService = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
     res = {
-      send: jest.fn((body) => body)
+      send: jest.fn((body) => body),
     } as unknown as Response;
   });
 
@@ -48,23 +48,32 @@ describe('AuthController', () => {
   });
 
   describe('signup', () => {
-    const userDto: CreateUserDto = { email: 'ryan@ryan.com', username: 'ryan', password: 'p4ssw0rd' };
+    const userDto: CreateUserDto = {
+      email: 'ryan@ryan.com',
+      username: 'ryan',
+      password: 'p4ssw0rd',
+    };
 
     it('should hash password, create user, and respond with success', async () => {
-      const createdUser: UserDto = { 
+      const createdUser: UserDto = {
         id: '9c0eee95-c0e7-4876-8dba-27af8a719c54',
         username: 'ryan',
         email: 'ryan@ryan.com',
-        password: 'p4ssw0rd'
+        password: 'p4ssw0rd',
       };
 
       (usersService.create as jest.Mock).mockResolvedValue(createdUser);
-      (authService.hashPassword as jest.Mock).mockResolvedValue(userDto.password);
+      (authService.hashPassword as jest.Mock).mockResolvedValue(
+        userDto.password,
+      );
 
       await controller.signup({ ...userDto }, res);
       expect(authService.hashPassword).toHaveBeenCalledWith(userDto.password);
       expect(usersService.create).toHaveBeenCalledWith(userDto);
-      expect(authService.respondSuccess).toHaveBeenCalledWith(res, createdUser.id);
+      expect(authService.respondSuccess).toHaveBeenCalledWith(
+        res,
+        createdUser.id,
+      );
     });
 
     it('should throw ConflictException when code is 23505', async () => {
@@ -72,7 +81,9 @@ describe('AuthController', () => {
       error.code = '23505';
       (usersService.create as jest.Mock).mockRejectedValue(error);
 
-      await expect(controller.signup({ ...userDto }, res)).rejects.toBeInstanceOf(ConflictException);
+      await expect(
+        controller.signup({ ...userDto }, res),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
   });
 
@@ -84,7 +95,7 @@ describe('AuthController', () => {
         id: '6cb1502c-2a84-41f8-9156-1d908316fc3b',
         username: 'ryan',
         email: 'ryan@ryan.com',
-        password: 'p4ssw0rd'
+        password: 'p4ssw0rd',
       });
 
       (authService.isAuthorized as jest.Mock).mockResolvedValue(true);
@@ -97,7 +108,9 @@ describe('AuthController', () => {
     it('should throw an error if the user does not exist', async () => {
       (usersService.getAuthDetails as jest.Mock).mockResolvedValue(null);
 
-      await expect(controller.login(loginCredentials, res)).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(
+        controller.login(loginCredentials, res),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
 
     it('should throw an error if the user is not authorized', async () => {
@@ -105,12 +118,14 @@ describe('AuthController', () => {
         id: '6cb1502c-2a84-41f8-9156-1d908316fc3b',
         username: 'ryan',
         email: 'ryan@ryan.com',
-        password: 'p4ssw0rd'
+        password: 'p4ssw0rd',
       });
 
       (authService.isAuthorized as jest.Mock).mockResolvedValue(false);
 
-      await expect(controller.login(loginCredentials, res)).rejects.toBeInstanceOf(UnauthorizedException); 
+      await expect(
+        controller.login(loginCredentials, res),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });
 });
