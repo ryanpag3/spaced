@@ -1,19 +1,21 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { AuthService } from "./auth.service";
-import { JwtService } from "@nestjs/jwt";
-import { Response } from "express";
+import { Test, TestingModule } from '@nestjs/testing';
+import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, {
-        provide: JwtService,
-        useValue: {
-          sign: jest.fn()
-        }
-      }],
+      providers: [
+        AuthService,
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
@@ -64,7 +66,10 @@ describe('AuthService', () => {
 
     it('should return false when the user it not properly authorized', async () => {
       const hash = await service.hashPassword('password');
-      const isAuthorized = await service.isAuthorized('differentpassword', hash);
+      const isAuthorized = await service.isAuthorized(
+        'differentpassword',
+        hash,
+      );
       expect(isAuthorized).toBe(false);
     });
   });
@@ -72,7 +77,7 @@ describe('AuthService', () => {
   describe('respondSuccess', () => {
     const res = {
       cookie: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     } as any;
 
     it('should send a token in the response', async () => {
@@ -80,6 +85,5 @@ describe('AuthService', () => {
       expect(res.cookie).toHaveBeenCalled();
       expect(res.send).toHaveBeenCalled();
     });
-  })
-
+  });
 });
