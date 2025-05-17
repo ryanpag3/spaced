@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserDto } from 'src/users/dto/UserDto';
 import { CreateUserDto } from 'src/users/dto/CreateUserDto';
 import { Response } from 'express';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -28,12 +29,8 @@ describe('AuthController', () => {
         {
           provide: UsersService,
           useValue: {
-            create: jest.fn().mockResolvedValue({ 
-              id: uuidv4, 
-              email: 'test@example.com',
-              username: 'ryan',
-              password: 'abcd1234'
-            } as UserDto),
+            create: jest.fn(),
+            getAuthDetails: jest.fn()
           },
         },
       ],
@@ -69,6 +66,52 @@ describe('AuthController', () => {
       expect(authService.hashPassword).toHaveBeenCalledWith(userDto.password);
       expect(usersService.create).toHaveBeenCalledWith(userDto);
       expect(authService.respondSuccess).toHaveBeenCalledWith(res, createdUser.id);
+    });
+
+    it('should throw ConflictException when code is 23505', async () => {
+      const error: any = new Error('duplicate');
+      error.code = '23505';
+      (usersService.create as jest.Mock).mockRejectedValue(error);
+
+      await expect(controller.signup({ ...userDto }, res)).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('login', () => {
+    const loginCredentials = { email: 'ryan@ryan.com', password: 'p4ssw0rd' };
+
+    it('should check if the user exists, check if the user is authorized, and then respond success', async () => {
+      (usersService.getAuthDetails as jest.Mock).mockResolvedValue({
+        id: '6cb1502c-2a84-41f8-9156-1d908316fc3b',
+        username: 'ryan',
+        email: 'ryan@ryan.com',
+        password: 'p4ssw0rd'
+      });
+
+      (authService.isAuthorized as jest.Mock).mockResolvedValue(true);
+
+      await controller.login(loginCredentials, res);
+
+      expect(authService.respondSuccess).toHaveBeenCalled();
+    });
+
+    it('should throw an error if the user does not exist', async () => {
+      (usersService.getAuthDetails as jest.Mock).mockResolvedValue(null);
+
+      await expect(controller.login(loginCredentials, res)).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('should throw an error if the user is not authorized', async () => {
+      (usersService.getAuthDetails as jest.Mock).mockResolvedValue({
+        id: '6cb1502c-2a84-41f8-9156-1d908316fc3b',
+        username: 'ryan',
+        email: 'ryan@ryan.com',
+        password: 'p4ssw0rd'
+      });
+
+      (authService.isAuthorized as jest.Mock).mockResolvedValue(false);
+
+      await expect(controller.login(loginCredentials, res)).rejects.toBeInstanceOf(UnauthorizedException); 
     });
   });
 });
