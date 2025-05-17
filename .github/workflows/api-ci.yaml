@@ -1,10 +1,14 @@
 name: API CI
 
 on:
-  push:
+  merge:
     branches:
       - main
       - master
+  push:
+    branches-ignore:
+      - !main
+      - !master
   pull_request:
     branches:
       - '*'
