@@ -2,7 +2,7 @@ name: API CI
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
       - master
   pull_request:
@@ -53,7 +53,7 @@ jobs:
 
       - name: Run tests
         working-directory: ./api
-        run: yarn test --ci
+        run: yarn test --coverage
 
       - name: Build app
         working-directory: ./api
@@ -65,3 +65,9 @@ jobs:
         with:
           name: api-dist
           path: api/dist/
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
