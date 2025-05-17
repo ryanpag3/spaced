@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 import { CreateUserDto } from '../users/dto/CreateUserDto';
 import { UserDto } from '../users/dto/UserDto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import Public from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 

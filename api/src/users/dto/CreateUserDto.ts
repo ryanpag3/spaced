@@ -3,7 +3,7 @@ import { IsEmail, IsOptional, IsString, IsUUID } from 'class-validator';
 export class CreateUserDto {
   @IsUUID()
   @IsOptional()
-  id: string;
+  id?: string;
 
   @IsString()
   username: string;
