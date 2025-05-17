@@ -1,12 +1,11 @@
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Response } from 'express';
+import { CreateUserDto } from 'src/users/dto/CreateUserDto';
+import { UserDto } from 'src/users/dto/UserDto';
+import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { v4 as uuidv4 } from 'uuid'; 
-import { UserDto } from 'src/users/dto/UserDto';
-import { CreateUserDto } from 'src/users/dto/CreateUserDto';
-import { Response } from 'express';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
