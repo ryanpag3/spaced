@@ -47,12 +47,12 @@ export default class SpacedApi {
         });
     }
 
-    static async createPost(token: string, body: any) {
+    static async createPost(token: string, body: FormData) {
         return fetch(`${Config.API_URL}/posts`, {
             method: 'POST',
-            body: JSON.stringify(body),
+            body: body,
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'multipart/form-data',
                 'Authorization': `Bearer ${token}`
             }
         });

@@ -11,10 +11,10 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function SubmitPostStep() {
   const params = useLocalSearchParams<{ selectedAssets: string }>();
-  const selectedAssets = JSON.parse(params.selectedAssets ?? "[]");
+  const selectedAssets = JSON.parse(params.selectedAssets ?? "[]") as Asset[];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [description, setDescription] = useState<string|undefined>();
-  const [tags, setTags] = useState<string|undefined>();
+  const [description, setDescription] = useState<string | undefined>();
+  const [tags, setTags] = useState<string | undefined>();
   const listRef = useRef<FlatList<Asset>>(null);
 
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -23,17 +23,38 @@ export default function SubmitPostStep() {
   };
 
   const handleSubmit = async () => {
-    const token = await Auth.getToken();
+    try {
+      console.log('submitting');
+      const token = await Auth.getToken();
+      const tagsArr = tags?.split(',') ?? [];
+      const formData = new FormData();
+      if (description) {
+        formData.append('description', description);
+      }
 
-    const body = {
-      description,
-      tags: tags?.split(',') ?? []
-    };
-    console.log(body);
-    const result = await SpacedApi.createPost(token as string, body);
-    console.log(result);
-//    console.log(JSON.stringify(selectedAssets, null, 4));
-    // do something
+      if (tagsArr.length > 0) {
+        for (const tag of tagsArr) {
+          console.log(tag);
+          formData.append('tags[]', tag);
+        }
+      }
+
+      selectedAssets.forEach((asset, index) => {
+        if (asset.uri && asset.mediaType && asset.filename) {
+          formData.append('media', {
+            uri: (asset as any).localUri,
+            name: asset.filename,
+            type: asset.mediaType
+          } as any);
+        }
+      });
+
+      console.log(formData);
+      const result = await SpacedApi.createPost(token as string, formData);
+      console.log(JSON.stringify(result, null, 4));
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (
@@ -51,7 +72,7 @@ export default function SubmitPostStep() {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onMomentumScrollEnd}
-          renderItem={({ item}) => (
+          renderItem={({ item }) => (
             <Image
               source={{ uri: item.uri }}
               style={styles.image}
@@ -90,7 +111,7 @@ export default function SubmitPostStep() {
           placeholder="Add tags, separated by commas"
         />
 
-          <View style={styles.submitButtonContainer}>
+        <View style={styles.submitButtonContainer}>
           <Button title="Submit" onPress={handleSubmit} />
         </View>
       </View>
