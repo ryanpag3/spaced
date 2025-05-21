@@ -2,19 +2,23 @@ import SpacedApi from '@/api/spaced';
 import Auth from '@/lib/auth';
 import { Image } from 'expo-image';
 import { Asset } from 'expo-media-library';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Button, Dimensions, FlatList, KeyboardAvoidingView, NativeScrollEvent, NativeSyntheticEvent, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Button, Dimensions, FlatList, KeyboardAvoidingView, NativeScrollEvent, NativeSyntheticEvent, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function SubmitPostStep() {
+  const router = useRouter();
   const params = useLocalSearchParams<{ selectedAssets: string }>();
   const selectedAssets = JSON.parse(params.selectedAssets ?? "[]") as Asset[];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [description, setDescription] = useState<string | undefined>();
   const [tags, setTags] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const listRef = useRef<FlatList<Asset>>(null);
 
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -24,7 +28,9 @@ export default function SubmitPostStep() {
 
   const handleSubmit = async () => {
     try {
-      console.log('submitting');
+      setIsLoading(true);
+      const startTime = Date.now();
+      
       const token = await Auth.getToken();
       const tagsArr = tags?.split(',') ?? [];
       const formData = new FormData();
@@ -34,7 +40,6 @@ export default function SubmitPostStep() {
 
       if (tagsArr.length > 0) {
         for (const tag of tagsArr) {
-          console.log(tag);
           formData.append('tags[]', tag);
         }
       }
@@ -49,12 +54,43 @@ export default function SubmitPostStep() {
         }
       });
 
-      console.log(formData);
       const result = await SpacedApi.createPost(token as string, formData);
-      console.log(JSON.stringify(result, null, 4));
+      
+      // Add artificial delay if operation was too fast
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < 1000) {
+        await new Promise(resolve => setTimeout(resolve, 1000 - elapsedTime));
+      }
+      
+      setIsSuccess(true);
+      
+      // Navigate home after showing success for a moment
+      setTimeout(() => {
+        router.replace("/(app)/(tabs)/home");
+      }, 1500);
     } catch (e) {
-      console.log(e)
+      // Error handling remains but without logging
+      setIsLoading(false);
     }
+  }
+
+  if (isLoading || isSuccess) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        {isLoading && !isSuccess && (
+          <>
+            <ActivityIndicator size="large" color="#2f95dc" />
+            <Text style={styles.statusText}>Uploading your post...</Text>
+          </>
+        )}
+        {isSuccess && (
+          <>
+            <AntDesign name="checkcircle" size={64} color="#2ecc71" />
+            <Text style={styles.statusText}>Post successfully created!</Text>
+          </>
+        )}
+      </View>
+    );
   }
 
   return (
@@ -121,7 +157,7 @@ export default function SubmitPostStep() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
   carouselContainer: { height: SCREEN_WIDTH },
   image: { width: SCREEN_WIDTH, height: SCREEN_WIDTH },
   indicatorContainer: {
@@ -146,4 +182,9 @@ const styles = StyleSheet.create({
   submitButtonContainer: {
     marginTop: 24,
   },
+  statusText: {
+    fontSize: 18,
+    marginTop: 10,
+    textAlign: 'center',
+  }
 });
