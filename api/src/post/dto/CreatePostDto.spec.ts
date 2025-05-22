@@ -6,7 +6,7 @@ describe('CreatePostDto', () => {
   it('should pass validation with valid input', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 'Valid description',
-      tags: ['tag1', 'tag2']
+      tags: ['tag1', 'tag2'],
     });
 
     const errors = await validate(dto);
@@ -16,7 +16,7 @@ describe('CreatePostDto', () => {
   it('should pass validation with empty tags', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 'Valid description',
-      tags: []
+      tags: [],
     });
 
     const errors = await validate(dto);
@@ -25,7 +25,7 @@ describe('CreatePostDto', () => {
 
   it('should pass validation without tags', async () => {
     const dto = plainToInstance(CreatePostDto, {
-      description: 'Valid description'
+      description: 'Valid description',
     });
 
     const errors = await validate(dto, { skipMissingProperties: true });
@@ -34,7 +34,7 @@ describe('CreatePostDto', () => {
 
   it('should pass validation without description', async () => {
     const dto = plainToInstance(CreatePostDto, {
-      tags: ['tag1', 'tag2']
+      tags: ['tag1', 'tag2'],
     });
 
     const errors = await validate(dto, { skipMissingProperties: true });
@@ -44,7 +44,7 @@ describe('CreatePostDto', () => {
   it('should fail validation with non-string description', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 123,
-      tags: ['tag1', 'tag2']
+      tags: ['tag1', 'tag2'],
     });
 
     const errors = await validate(dto);
@@ -55,7 +55,7 @@ describe('CreatePostDto', () => {
   it('should fail validation with non-array tags', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 'Valid description',
-      tags: 'not-an-array'
+      tags: 'not-an-array',
     });
 
     const errors = await validate(dto);
@@ -66,7 +66,7 @@ describe('CreatePostDto', () => {
   it('should fail validation with non-string elements in tags array', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 'Valid description',
-      tags: ['valid', 123, 'also-valid']
+      tags: ['valid', 123, 'also-valid'],
     });
 
     const errors = await validate(dto);

@@ -35,7 +35,7 @@ describe('PostController', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostController],
       providers: [
@@ -57,7 +57,7 @@ describe('PostController', () => {
     const mockRequest = {
       user: { id: 'user-123' },
     } as AuthenticatedRequest;
-    
+
     const mockFiles = [
       {
         originalname: 'test-image.jpg',
@@ -70,7 +70,7 @@ describe('PostController', () => {
         buffer: Buffer.from('mock-video-data'),
       },
     ] as Express.Multer.File[];
-    
+
     const mockBody = {
       description: 'Test post description',
       tags: ['test', 'post'],
@@ -89,8 +89,16 @@ describe('PostController', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       media: [
-        { id: 'media-1', s3Key: 'media/user-123/mocked-uuid.jpg', mimeType: 'image/jpeg' },
-        { id: 'media-2', s3Key: 'media/user-123/mocked-uuid.mp4', mimeType: 'video/mp4' },
+        {
+          id: 'media-1',
+          s3Key: 'media/user-123/mocked-uuid.jpg',
+          mimeType: 'image/jpeg',
+        },
+        {
+          id: 'media-2',
+          s3Key: 'media/user-123/mocked-uuid.mp4',
+          mimeType: 'video/mp4',
+        },
       ],
     };
 
@@ -117,7 +125,7 @@ describe('PostController', () => {
           tags: mockBody.tags,
           authorId: mockRequest.user.id,
           media: {
-            create: mockUploadResults.map(m => ({
+            create: mockUploadResults.map((m) => ({
               s3Key: m.key,
               mimeType: m.mimetype,
             })),
@@ -127,11 +135,11 @@ describe('PostController', () => {
           media: true,
         },
       });
-      
+
       expect(result).toEqual(mockCreatedPost);
       expect(mockS3Service.deleteFile).not.toHaveBeenCalled();
     });
-    
+
     it('should clean up uploaded media if post creation fails', async () => {
       // Setup mocks
       mockS3Service.uploadFile.mockImplementation((key, file) => {
@@ -146,28 +154,33 @@ describe('PostController', () => {
       prisma.post.create = jest.fn().mockRejectedValue(mockError);
 
       // Call the method and catch the error
-      await expect(controller.create(mockRequest, mockBody, mockFiles))
-        .rejects.toThrow(InternalServerErrorException);
+      await expect(
+        controller.create(mockRequest, mockBody, mockFiles),
+      ).rejects.toThrow(InternalServerErrorException);
 
       // Assertions
       expect(mockS3Service.uploadFile).toHaveBeenCalledTimes(2);
       expect(prisma.post.create).toHaveBeenCalledTimes(1);
-      
+
       // Verify cleanup occurred
       expect(mockS3Service.deleteFile).toHaveBeenCalledTimes(2);
-      expect(mockS3Service.deleteFile).toHaveBeenCalledWith(mockUploadResults[0].key);
-      expect(mockS3Service.deleteFile).toHaveBeenCalledWith(mockUploadResults[1].key);
+      expect(mockS3Service.deleteFile).toHaveBeenCalledWith(
+        mockUploadResults[0].key,
+      );
+      expect(mockS3Service.deleteFile).toHaveBeenCalledWith(
+        mockUploadResults[1].key,
+      );
     });
-    
+
     it('should handle empty file list', async () => {
       // Call with empty files array
       prisma.post.create = jest.fn().mockResolvedValue({
         ...mockCreatedPost,
-        media: []
+        media: [],
       });
-      
+
       const result = await controller.create(mockRequest, mockBody, []);
-      
+
       expect(mockS3Service.uploadFile).not.toHaveBeenCalled();
       expect(prisma.post.create).toHaveBeenCalledWith({
         data: {
@@ -182,19 +195,20 @@ describe('PostController', () => {
           media: true,
         },
       });
-      
+
       expect(result.media).toEqual([]);
     });
-    
+
     it('should handle S3 upload failure', async () => {
       // Setup S3 upload to fail
       const uploadError = new Error('S3 upload failed');
       mockS3Service.uploadFile.mockRejectedValue(uploadError);
-      
+
       // Call the method and expect it to throw
-      await expect(controller.create(mockRequest, mockBody, mockFiles))
-        .rejects.toThrow(InternalServerErrorException);
-        
+      await expect(
+        controller.create(mockRequest, mockBody, mockFiles),
+      ).rejects.toThrow(InternalServerErrorException);
+
       // Verify behavior
       expect(mockS3Service.uploadFile).toHaveBeenCalled();
       expect(prisma.post.create).not.toHaveBeenCalled();
