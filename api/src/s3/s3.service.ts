@@ -4,6 +4,7 @@ import {
   HeadBucketCommand,
   PutObjectCommand,
   S3Client,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { Injectable, Logger } from '@nestjs/common';
 
@@ -89,5 +90,18 @@ export class S3Service {
       }),
     );
     Logger.debug(`Deleted file from S3 with key ${key}`);
+  }
+
+  /**
+   * Get a file from S3 using its key
+   * @param key - The unique key where the file is stored in the S3 bucket
+   * @returns The S3 GetObjectCommandOutput
+   */
+  public async getFile(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+    });
+    return await this.client.send(command);
   }
 }

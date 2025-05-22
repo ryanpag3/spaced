@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedRequest } from '../common/types/request.type';
 import { S3Service } from '../s3/s3.service';
 import { PostController } from './post.controller';
+import { PostService } from './post.service';
 
 // Mock uuid to return predictable values
 jest.mock('uuid');
@@ -16,6 +17,8 @@ jest.mock('../db/prisma', () => {
     default: {
       post: {
         create: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
       },
     },
   };
@@ -30,6 +33,11 @@ const mockS3Service = {
   deleteFile: jest.fn(),
 };
 
+// Mock the PostService
+const mockPostService = {
+  getProfilePosts: jest.fn(),
+};
+
 describe('PostController', () => {
   let controller: PostController;
 
@@ -42,6 +50,10 @@ describe('PostController', () => {
         {
           provide: S3Service,
           useValue: mockS3Service,
+        },
+        {
+          provide: PostService,
+          useValue: mockPostService,
         },
       ],
     }).compile();
@@ -212,6 +224,81 @@ describe('PostController', () => {
       // Verify behavior
       expect(mockS3Service.uploadFile).toHaveBeenCalled();
       expect(prisma.post.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('list', () => {
+    const mockRequest = {
+      user: { id: 'user-456' },
+    } as AuthenticatedRequest;
+
+    const mockListResponse = {
+      posts: [
+        {
+          id: 'post-1',
+          description: 'First post',
+          authorId: 'user-456',
+          tags: ['test'],
+          mediaUris: ['media/user-456/image1.jpg']
+        },
+        {
+          id: 'post-2',
+          description: 'Second post',
+          authorId: 'user-456',
+          tags: ['sample'],
+          mediaUris: ['media/user-456/image2.jpg']
+        }
+      ],
+      nextPageToken: 'post-2',
+      total: 10
+    };
+
+    beforeEach(() => {
+      mockPostService.getProfilePosts.mockReset();
+    });
+
+    it('should return profile posts with pagination', async () => {
+      // Setup mock
+      mockPostService.getProfilePosts.mockResolvedValue(mockListResponse);
+
+      // Call the method
+      const result = await controller.list(
+        mockRequest,
+        'profile',
+        20,
+        undefined,
+        undefined
+      );
+
+      // Assertions
+      expect(mockPostService.getProfilePosts).toHaveBeenCalledWith(
+        mockRequest.user.id,
+        20,
+        undefined
+      );
+      expect(result).toEqual(mockListResponse);
+    });
+
+    it('should pass cursor to getProfilePosts when provided', async () => {
+      // Setup mock
+      mockPostService.getProfilePosts.mockResolvedValue(mockListResponse);
+      
+      // Call with cursor
+      const cursor = 'post-1';
+      await controller.list(
+        mockRequest,
+        'profile',
+        10,
+        undefined,
+        cursor
+      );
+
+      // Verify cursor was passed
+      expect(mockPostService.getProfilePosts).toHaveBeenCalledWith(
+        mockRequest.user.id,
+        10,
+        cursor
+      );
     });
   });
 });

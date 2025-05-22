@@ -23,14 +23,17 @@ import { v4 as uuidv4 } from 'uuid';
 import CreatePostDto from './dto/CreatePostDto';
 import { Response } from 'express';
 import { ListPostDto } from './dto/ListPostResponseDto';
+import { PostService } from './post.service';
 
 @ApiTags('posts')
 @Controller('posts')
 export class PostController {
   private s3service: S3Service;
+  private postService: PostService;
 
-  constructor(s3Service: S3Service) {
+  constructor(s3Service: S3Service, postService: PostService) {
     this.s3service = s3Service;
+    this.postService = postService;
   }
 
   @Post()
@@ -130,8 +133,8 @@ export class PostController {
         `Post creation failed: ${e.message}`,
       );
     }
-  }
-
+  }  
+  
   @Get()
   @ApiOperation({ summary: 'List posts based on feed type' })
   @ApiQuery({ name: 'feedType', enum: ['profile', 'space', 'home'], required: true, description: 'Type of feed to retrieve' })
@@ -142,11 +145,25 @@ export class PostController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid parameters' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'User not authenticated' })
   async list(
+    @Req() request: AuthenticatedRequest,
     @Query('feedType') feedType: 'profile'|'space'|'home',
     @Query('size') size: number = 20,
     @Query('filter') filter?: string,
     @Query('nextPageToken') nextPageToken?: string
   ): Promise<ListPostDto> {
-    return null
+    const userId = request.user.id;
+    
+    switch (feedType) {
+      case 'profile':
+        return this.postService.getProfilePosts(userId, size, nextPageToken);
+      case 'space':
+        // TODO: Implement space feed
+        return { posts: [], total: 0 };
+      case 'home':
+        // TODO: Implement home feed
+        return { posts: [], total: 0 };
+      default:
+        throw new BadRequestException(`Invalid feedType: ${feedType}`);
+    }
   }
 }
