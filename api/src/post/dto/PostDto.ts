@@ -19,4 +19,9 @@ export class PostDto {
   @IsArray()
   @IsString({ each: true })
   tags: string[];
+
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  mediaUris: string[];
 }

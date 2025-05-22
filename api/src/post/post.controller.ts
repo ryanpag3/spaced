@@ -2,16 +2,18 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
   InternalServerErrorException,
   Logger,
   Post,
+  Query,
   Req,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { extname } from 'path';
 import { AuthenticatedRequest } from '../common/types/request.type';
@@ -19,6 +21,8 @@ import prisma from '../db/prisma';
 import { S3Service } from '../s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import CreatePostDto from './dto/CreatePostDto';
+import { Response } from 'express';
+import { ListPostDto } from './dto/ListPostResponseDto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -126,5 +130,23 @@ export class PostController {
         `Post creation failed: ${e.message}`,
       );
     }
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List posts based on feed type' })
+  @ApiQuery({ name: 'feedType', enum: ['profile', 'space', 'home'], required: true, description: 'Type of feed to retrieve' })
+  @ApiQuery({ name: 'size', type: Number, required: false, description: 'Number of posts to return', example: 20 })
+  @ApiQuery({ name: 'filter', type: String, required: false, description: 'Optional filter for posts' })
+  @ApiQuery({ name: 'nextPageToken', type: String, required: false, description: 'Token for pagination' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'List of posts retrieved successfully', type: ListPostDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid parameters' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'User not authenticated' })
+  async list(
+    @Query('feedType') feedType: 'profile'|'space'|'home',
+    @Query('size') size: number = 20,
+    @Query('filter') filter?: string,
+    @Query('nextPageToken') nextPageToken?: string
+  ): Promise<ListPostDto> {
+    return null
   }
 }
