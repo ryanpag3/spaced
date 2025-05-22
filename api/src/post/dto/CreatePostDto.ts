@@ -12,9 +12,10 @@ export default class CreatePostDto {
 
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   @ApiProperty({
     example: ['friends', 'nightout'],
     description: 'An array of strings representing the tags of the content.',
   })
-  tags: string[];
+  tags?: string[];
 }
