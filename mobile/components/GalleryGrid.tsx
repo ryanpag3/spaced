@@ -38,17 +38,20 @@ export default function GalleryGrid({
       mediaType: ['photo', 'video'],
       sortBy: [MediaLibrary.SortBy.creationTime]
     });
+
     setAssets((prev) => [...prev, ...page.assets]);
     setEndCursor(page.endCursor);
     setHasMore(page.hasNextPage);
     setLoading(false);
   }
 
-  const toggleSelect = (asset: MediaLibrary.Asset) => {
+  const toggleSelect = async (asset: MediaLibrary.Asset) => {
     if (selected[asset.id]) {
       delete selected[asset.id];
     } else {
-      selected[asset.id] = asset;
+      // Get detailed asset info only when selected
+      const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+      selected[asset.id] = assetInfo;
     }
     setSelected({...selected});
     onSelectedAssetsChanged(Object.values(selected));
