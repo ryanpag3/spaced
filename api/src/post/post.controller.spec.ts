@@ -1,9 +1,9 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PostController } from './post.controller';
-import { S3Service } from '../s3/s3.service';
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { AuthenticatedRequest } from '../common/types/request.type';
 import { v4 as uuidv4 } from 'uuid';
+import { AuthenticatedRequest } from '../common/types/request.type';
+import { S3Service } from '../s3/s3.service';
+import { PostController } from './post.controller';
 
 // Mock uuid to return predictable values
 jest.mock('uuid');
