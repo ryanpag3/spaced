@@ -32,7 +32,6 @@ const mockS3Service = {
 
 describe('PostController', () => {
   let controller: PostController;
-  let s3Service: S3Service;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -48,7 +47,6 @@ describe('PostController', () => {
     }).compile();
 
     controller = module.get<PostController>(PostController);
-    s3Service = module.get<S3Service>(S3Service);
   });
 
   it('should be defined', () => {
