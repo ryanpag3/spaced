@@ -27,7 +27,7 @@ describe('PostService', () => {
     }).compile();
 
     service = module.get<PostService>(PostService);
-    
+
     // Reset mock calls between tests
     jest.clearAllMocks();
   });
@@ -35,7 +35,7 @@ describe('PostService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  
+
   describe('getProfilePosts', () => {
     it('should return user posts with default pagination', async () => {
       // Arrange
@@ -57,20 +57,18 @@ describe('PostService', () => {
           authorId: mockUserId,
           tags: ['tag3'],
           createdAt: new Date(),
-          media: [
-            { id: 'media-3', s3Key: 's3://bucket/media3.jpg' },
-          ],
+          media: [{ id: 'media-3', s3Key: 's3://bucket/media3.jpg' }],
         },
       ];
-      
+
       const mockCount = 2;
-      
+
       (prisma.post.findMany as jest.Mock).mockResolvedValue(mockPosts);
       (prisma.post.count as jest.Mock).mockResolvedValue(mockCount);
-      
+
       // Act
       const result = await service.getProfilePosts(mockUserId);
-      
+
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
         where: { authorId: mockUserId },
@@ -78,19 +76,22 @@ describe('PostService', () => {
         orderBy: { createdAt: 'desc' },
         include: { media: true },
       });
-      
+
       expect(prisma.post.count).toHaveBeenCalledWith({
         where: { authorId: mockUserId },
       });
-      
+
       expect(result).toBeDefined();
       expect(result.posts).toHaveLength(2);
       expect(result.posts[0].id).toBe('post-id-1');
-      expect(result.posts[0].mediaUris).toEqual(['s3://bucket/media1.jpg', 's3://bucket/media2.jpg']);
+      expect(result.posts[0].mediaUris).toEqual([
+        's3://bucket/media1.jpg',
+        's3://bucket/media2.jpg',
+      ]);
       expect(result.total).toBe(mockCount);
       expect(result.nextPageToken).toBeUndefined();
     });
-    
+
     it('should handle pagination with cursor', async () => {
       // Arrange
       const mockPosts = [
@@ -100,22 +101,24 @@ describe('PostService', () => {
           authorId: mockUserId,
           tags: ['tag4'],
           createdAt: new Date(),
-          media: [
-            { id: 'media-4', s3Key: 's3://bucket/media4.jpg' },
-          ],
+          media: [{ id: 'media-4', s3Key: 's3://bucket/media4.jpg' }],
         },
       ];
-      
+
       const mockCount = 3;
       const mockCursor = 'post-id-2';
       const mockSize = 10;
-      
+
       (prisma.post.findMany as jest.Mock).mockResolvedValue(mockPosts);
       (prisma.post.count as jest.Mock).mockResolvedValue(mockCount);
-      
+
       // Act
-      const result = await service.getProfilePosts(mockUserId, mockSize, mockCursor);
-      
+      const result = await service.getProfilePosts(
+        mockUserId,
+        mockSize,
+        mockCursor,
+      );
+
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
         where: { authorId: mockUserId },
@@ -125,12 +128,12 @@ describe('PostService', () => {
         orderBy: { createdAt: 'desc' },
         include: { media: true },
       });
-      
+
       expect(result.posts).toHaveLength(1);
       expect(result.total).toBe(mockCount);
       expect(result.nextPageToken).toBeUndefined();
     });
-    
+
     it('should handle hasNextPage when there are more results', async () => {
       // Arrange
       const mockSize = 2;
@@ -161,15 +164,15 @@ describe('PostService', () => {
           media: [{ id: 'media-3', s3Key: 's3://bucket/media3.jpg' }],
         },
       ];
-      
+
       const mockCount = 3;
-      
+
       (prisma.post.findMany as jest.Mock).mockResolvedValue(mockPosts);
       (prisma.post.count as jest.Mock).mockResolvedValue(mockCount);
-      
+
       // Act
       const result = await service.getProfilePosts(mockUserId, mockSize);
-      
+
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
         where: { authorId: mockUserId },
@@ -177,38 +180,40 @@ describe('PostService', () => {
         orderBy: { createdAt: 'desc' },
         include: { media: true },
       });
-      
+
       // Should only return mockSize items, not the extra one
       expect(result.posts).toHaveLength(mockSize);
       expect(result.total).toBe(mockCount);
       // The nextPageToken should be set to the ID of the last item
       expect(result.nextPageToken).toBe('post-id-2');
     });
-    
+
     it('should handle empty results', async () => {
       // Arrange
       const mockPosts = [];
       const mockCount = 0;
-      
+
       (prisma.post.findMany as jest.Mock).mockResolvedValue(mockPosts);
       (prisma.post.count as jest.Mock).mockResolvedValue(mockCount);
-      
+
       // Act
       const result = await service.getProfilePosts(mockUserId);
-      
+
       // Assert
       expect(result.posts).toHaveLength(0);
       expect(result.total).toBe(0);
       expect(result.nextPageToken).toBeUndefined();
     });
-    
+
     it('should handle error cases gracefully', async () => {
       // Arrange
       const mockError = new Error('Database error');
       (prisma.post.findMany as jest.Mock).mockRejectedValue(mockError);
-      
+
       // Act & Assert
-      await expect(service.getProfilePosts(mockUserId)).rejects.toThrow(mockError);
+      await expect(service.getProfilePosts(mockUserId)).rejects.toThrow(
+        mockError,
+      );
     });
   });
 });

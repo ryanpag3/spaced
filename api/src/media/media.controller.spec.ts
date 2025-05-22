@@ -18,7 +18,6 @@ import prisma from '../db/prisma';
 
 describe('MediaController', () => {
   let controller: MediaController;
-  let s3Service: S3Service;
 
   const mockS3Service = {
     getFile: jest.fn(),
@@ -30,7 +29,7 @@ describe('MediaController', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MediaController],
       providers: [
@@ -42,7 +41,6 @@ describe('MediaController', () => {
     }).compile();
 
     controller = module.get<MediaController>(MediaController);
-    s3Service = module.get<S3Service>(S3Service);
   });
 
   it('should be defined', () => {
@@ -60,7 +58,7 @@ describe('MediaController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      
+
       const mockBody = Readable.from(['test data']);
       const mockGetObjectResult = {
         Body: mockBody,
@@ -70,7 +68,10 @@ describe('MediaController', () => {
       (prisma.media.findUnique as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
 
-      const result = await controller.getMedia(mockMediaId, mockResponse as any);
+      const result = await controller.getMedia(
+        mockMediaId,
+        mockResponse as any,
+      );
 
       expect(prisma.media.findUnique).toHaveBeenCalledWith({
         where: { id: mockMediaId },
@@ -87,8 +88,9 @@ describe('MediaController', () => {
     it('should throw NotFoundException when media is not found in database', async () => {
       (prisma.media.findUnique as jest.Mock).mockResolvedValueOnce(null);
 
-      await expect(controller.getMedia('non-existent-id', mockResponse as any))
-        .rejects.toThrow(NotFoundException);
+      await expect(
+        controller.getMedia('non-existent-id', mockResponse as any),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when S3 file retrieval fails', async () => {
@@ -104,8 +106,9 @@ describe('MediaController', () => {
       (prisma.media.findUnique as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockRejectedValueOnce(new Error('S3 error'));
 
-      await expect(controller.getMedia('test-id', mockResponse as any))
-        .rejects.toThrow(NotFoundException);
+      await expect(
+        controller.getMedia('test-id', mockResponse as any),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

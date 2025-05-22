@@ -239,18 +239,18 @@ describe('PostController', () => {
           description: 'First post',
           authorId: 'user-456',
           tags: ['test'],
-          mediaUris: ['media/user-456/image1.jpg']
+          mediaUris: ['media/user-456/image1.jpg'],
         },
         {
           id: 'post-2',
           description: 'Second post',
           authorId: 'user-456',
           tags: ['sample'],
-          mediaUris: ['media/user-456/image2.jpg']
-        }
+          mediaUris: ['media/user-456/image2.jpg'],
+        },
       ],
       nextPageToken: 'post-2',
-      total: 10
+      total: 10,
     };
 
     beforeEach(() => {
@@ -267,14 +267,14 @@ describe('PostController', () => {
         'profile',
         20,
         undefined,
-        undefined
+        undefined,
       );
 
       // Assertions
       expect(mockPostService.getProfilePosts).toHaveBeenCalledWith(
         mockRequest.user.id,
         20,
-        undefined
+        undefined,
       );
       expect(result).toEqual(mockListResponse);
     });
@@ -282,22 +282,16 @@ describe('PostController', () => {
     it('should pass cursor to getProfilePosts when provided', async () => {
       // Setup mock
       mockPostService.getProfilePosts.mockResolvedValue(mockListResponse);
-      
+
       // Call with cursor
       const cursor = 'post-1';
-      await controller.list(
-        mockRequest,
-        'profile',
-        10,
-        undefined,
-        cursor
-      );
+      await controller.list(mockRequest, 'profile', 10, undefined, cursor);
 
       // Verify cursor was passed
       expect(mockPostService.getProfilePosts).toHaveBeenCalledWith(
         mockRequest.user.id,
         10,
-        cursor
+        cursor,
       );
     });
   });

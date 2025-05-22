@@ -1,14 +1,14 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ListPostRequestDto {
-    @IsNumber()
-    @IsOptional()
-    pageSize?: number;
+  @IsNumber()
+  @IsOptional()
+  pageSize?: number;
 
-    @IsString()
-    @IsOptional()
-    pageToken?: string;
+  @IsString()
+  @IsOptional()
+  pageToken?: string;
 
-    @IsString()
-    feedType: 'profile'|'space'|'home';
+  @IsString()
+  feedType: 'profile' | 'space' | 'home';
 }
