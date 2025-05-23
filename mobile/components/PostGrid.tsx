@@ -48,7 +48,7 @@ export default function PostGrid() {
     
     if (refresh) {
       setRefreshing(true);
-      setPosts([]);
+      // Don't clear posts immediately to prevent flashing
       setNextPageToken(undefined);
       setHasMore(true);
       setError(null);
@@ -112,7 +112,9 @@ export default function PostGrid() {
         return post;
       });
       
-      setPosts((prev) => refresh ? processedPosts : [...prev, ...processedPosts]);
+      // Only update posts once we have the new data
+      setPosts(refresh ? processedPosts : [...posts, ...processedPosts]);
+      console.log(`Posts updated: ${refresh ? 'refreshed' : 'appended'}, total: ${refresh ? processedPosts.length : posts.length + processedPosts.length}`);
       setNextPageToken(data.nextPageToken);
       setHasMore(!!data.nextPageToken);
     } catch (err: any) {
@@ -154,8 +156,9 @@ export default function PostGrid() {
               source={{ uri: imageUri }} 
               style={styles.image} 
               contentFit="cover"
-              transition={300}
+              transition={500}
               cachePolicy="memory-disk"
+              placeholderContentFit="cover"
             />
           </TouchableOpacity>
         );
@@ -171,8 +174,9 @@ export default function PostGrid() {
             source={{ uri: imageUri }} 
             style={styles.image} 
             contentFit="cover"
-            transition={300}
+            transition={500}
             cachePolicy="memory-disk"
+            placeholderContentFit="cover"
           />
         </TouchableOpacity>
       );
