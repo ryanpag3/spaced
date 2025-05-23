@@ -1,44 +1,65 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+const tintColorLight = '#6366f1';
+const tintColorDark = '#a5b4fc';
 
 export default {
   light: {
-    text: '#000',
-    background: '#fff',
+    text: '#1f2937',
+    background: '#ffffff',
     tint: tintColorLight,
-    tabIconDefault: '#ccc',
+    tabIconDefault: '#9ca3af',
     tabIconSelected: tintColorLight,
 
     /* Button */
-    buttonBackground: '#2f95dc',
-    buttonText: '#fff',
-
+    buttonBackground: '#6366f1',
+    buttonText: '#ffffff',
 
     /* TextInput */
-    textInputBackground: '#f0f0f0',
-    textInputBorder: '#ccc',
-    textInputText: '#000',
-    textInputPlaceholder: '#999',
-    textInputPlaceholderTextColor: '#999',
-    textInputBorderColor: '#ccc',
+    textInputBackground: '#ffffff',
+    textInputBorder: '#e5e7eb',
+    textInputText: '#1f2937',
+    textInputPlaceholder: '#9ca3af',
+    textInputPlaceholderTextColor: '#9ca3af',
+    textInputBorderColor: '#e5e7eb',
+    textInputFocusedBorderColor: '#6366f1',
+
+    /* Auth */
+    authBackground: '#fafafa',
+    authCardBackground: '#ffffff',
+    authSecondaryText: '#6b7280',
+    authErrorText: '#ef4444',
+    
+    /* Shadows */
+    shadowColor: '#000000',
+    shadowOpacity: 0.05,
   },
   dark: {
-    text: '#fff',
-    background: '#000',
+    text: '#f3f4f6',
+    background: '#111827',
     tint: tintColorDark,
-    tabIconDefault: '#ccc',
+    tabIconDefault: '#6b7280',
     tabIconSelected: tintColorDark,
 
     /* Button */
-    buttonBackground: '#2f95dc',
-    buttonText: '#fff',
+    buttonBackground: '#6366f1',
+    buttonText: '#ffffff',
 
     /* TextInput */
-    textInputBackground: '#333',
-    textInputBorder: '#666',
-    textInputText: '#fff',
-    textInputPlaceholder: '#999',
-    textInputPlaceholderTextColor: '#999',
-    textInputBorderColor: '#666',
+    textInputBackground: '#1f2937',
+    textInputBorder: '#374151',
+    textInputText: '#f3f4f6',
+    textInputPlaceholder: '#9ca3af',
+    textInputPlaceholderTextColor: '#9ca3af',
+    textInputBorderColor: '#374151',
+    textInputFocusedBorderColor: '#6366f1',
+
+    /* Auth */
+    authBackground: '#0f172a',
+    authCardBackground: '#1f2937',
+    authSecondaryText: '#9ca3af',
+    authErrorText: '#f87171',
+    
+    /* Shadows */
+    shadowColor: '#000000',
+    shadowOpacity: 0.2,
   },
 };
