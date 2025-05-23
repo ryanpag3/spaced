@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View as RNView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Text, View } from './Themed';
+import { useThemedStyles } from './useThemedStyles';
+import { useTheme } from './ThemeProvider';
 import AuthService from '@/services/AuthService';
 import SpacedApi from '@/api/spaced';
 import Config from 'react-native-config';
@@ -13,6 +15,8 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function PostFeed() {
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useTheme();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -267,15 +271,15 @@ export default function PostFeed() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => fetchPosts(true)}
-          tintColor="#666"
+          tintColor={colors.activityIndicator}
           title="Refreshing posts..."
         />
       }
-      ListFooterComponent={loading && !refreshing ? <ActivityIndicator style={styles.loader} /> : null}
+      ListFooterComponent={loading && !refreshing ? <ActivityIndicator style={styles.loader} color={colors.activityIndicator} /> : null}
       ListEmptyComponent={
         loading && !refreshing ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color="#666" />
+            <ActivityIndicator size="large" color={colors.activityIndicator} />
             <Text style={{marginTop: 10}}>Loading posts...</Text>
           </View>
         ) : null
@@ -285,18 +289,18 @@ export default function PostFeed() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   list: {
     width: '100%',
     flex: 1,
   },
   postCard: {
     marginBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   mediaContainer: {
     width: '100%',
@@ -328,7 +332,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
@@ -339,11 +343,12 @@ const styles = StyleSheet.create({
   },
   postDate: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textTertiary,
     marginBottom: 8,
   },
   postDescription: {
     fontSize: 16,
+    color: colors.text,
     marginBottom: 12,
   },
   tagsContainer: {
@@ -352,7 +357,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   tag: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -361,17 +366,17 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
   },
   noImagePlaceholder: {
     width: '100%', 
     height: 200,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   noImageText: {
-    color: '#666',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   center: {
@@ -385,24 +390,24 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#d32f2f',
+    color: colors.error,
     marginBottom: 16,
     textAlign: 'center',
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 16,
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.buttonPrimary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 4,
   },
   retryButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -1,6 +1,8 @@
 import { Link, LinkProps } from 'expo-router';
 import { StyleSheet, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from './Themed';
+import { useThemedStyles } from './useThemedStyles';
+import { ColorTheme } from '@/constants/Colors';
 
 type LinkButtonProps = Omit<LinkProps, 'style'> & {
   children: React.ReactNode;
@@ -17,6 +19,7 @@ export default function LinkButton({
   variant = 'link',
   ...props
 }: LinkButtonProps) {
+  const styles = useThemedStyles(createStyles);
 
   const containerStyle = () => {
     switch (variant) {
@@ -51,9 +54,9 @@ export default function LinkButton({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorTheme, isDark: boolean) => StyleSheet.create({
   primaryButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.buttonPrimary,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -61,19 +64,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 8,
     minHeight: 56,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: colors.shadowOpacity,
     shadowRadius: 8,
     elevation: 2,
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.buttonSecondary,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#6366f1',
+    borderColor: colors.buttonPrimary,
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 8,
@@ -88,19 +91,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   primaryText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
   secondaryText: {
-    color: '#6366f1',
+    color: colors.buttonTextSecondary,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
   linkText: {
-    color: '#6366f1',
+    color: colors.buttonTextSecondary,
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',

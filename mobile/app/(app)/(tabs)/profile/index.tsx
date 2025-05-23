@@ -6,10 +6,15 @@ import { useAuth } from '@/components/useAuth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { Entypo } from '@expo/vector-icons';
+import { useThemedStyles } from '@/components/useThemedStyles';
+import { useTheme } from '@/components/ThemeProvider';
+import { ColorTheme } from '@/constants/Colors';
 
 export default function Profile() {
   const { isAuthenticated, loading, user } = useAuth();
   const [viewMode, setViewMode] = useState<'grid' | 'feed'>('grid');
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useTheme();
 
   if (loading) {
     return (
@@ -41,13 +46,13 @@ export default function Profile() {
             style={[styles.toggleButton, viewMode === 'grid' && styles.toggleButtonActive]} 
             onPress={() => setViewMode('grid')}
           >
-            <Entypo name="grid" size={18} color={viewMode === 'grid' ? '#000' : '#999'} />
+            <Entypo name="grid" size={18} color={viewMode === 'grid' ? colors.text : colors.textTertiary} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.toggleButton, viewMode === 'feed' && styles.toggleButtonActive]} 
             onPress={() => setViewMode('feed')}
           >
-            <Entypo name="list" size={18} color={viewMode === 'feed' ? '#000' : '#999'} />
+            <Entypo name="list" size={18} color={viewMode === 'feed' ? colors.text : colors.textTertiary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -58,17 +63,17 @@ export default function Profile() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorTheme, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -79,10 +84,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: colors.text,
   },
   username: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   gridContainer: {
@@ -90,7 +96,7 @@ const styles = StyleSheet.create({
   },
   viewToggle: {
     flexDirection: 'row',
-    backgroundColor: '#f2f2f2',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 8,
     padding: 2,
   },
@@ -100,10 +106,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   toggleButtonActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: colors.shadowOpacity,
     shadowRadius: 1,
     elevation: 1,
   },

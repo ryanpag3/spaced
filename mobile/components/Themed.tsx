@@ -11,8 +11,8 @@ import {
   TextInput as DefaultTextInput
 } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from './useColorScheme';
+import { useTheme, useThemeColor } from './ThemeProvider';
+import { ColorTheme } from '@/constants/Colors';
 
 type ThemeProps = {
   lightColor?: string;
@@ -23,19 +23,7 @@ export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
 export type TextInputProps = ThemeProps & DefaultTextInput['props'];
 
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
-) {
-  const theme = useColorScheme() ?? 'light';
-  const colorFromProps = props[theme];
-
-  if (colorFromProps) {
-    return colorFromProps;
-  } else {
-    return Colors[theme][colorName];
-  }
-}
+export { useTheme, useThemeColor };
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -57,8 +45,7 @@ export type ButtonProps = ThemeProps & TouchableOpacityProps & {
 
 export function Button(props: ButtonProps) {
   const { style, lightColor, darkColor, variant = 'primary', disabled, ...otherProps } = props;
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'buttonBackground') as string;
-  const theme = useColorScheme() ?? 'light';
+  const { colors } = useTheme();
   
   const getButtonStyles = () => {
     const baseStyle = {
@@ -74,42 +61,46 @@ export function Button(props: ButtonProps) {
       case 'primary':
         return {
           ...baseStyle,
-          backgroundColor: disabled ? Colors[theme].tabIconDefault : backgroundColor,
-          shadowColor: Colors[theme].shadowColor,
+          backgroundColor: disabled ? colors.buttonDisabled : colors.buttonPrimary,
+          shadowColor: colors.shadowColor,
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: disabled ? 0 : Colors[theme].shadowOpacity,
+          shadowOpacity: disabled ? 0 : colors.shadowOpacity,
           shadowRadius: 8,
           elevation: disabled ? 0 : 2,
         };
       case 'secondary':
         return {
           ...baseStyle,
-          backgroundColor: 'transparent',
+          backgroundColor: colors.buttonSecondary,
           borderWidth: 1.5,
-          borderColor: disabled ? Colors[theme].tabIconDefault : Colors[theme].tint,
+          borderColor: disabled ? colors.buttonDisabled : colors.tint,
         };
       case 'outline':
         return {
           ...baseStyle,
-          backgroundColor: 'transparent',
+          backgroundColor: colors.buttonOutline,
           borderWidth: 1.5,
-          borderColor: disabled ? Colors[theme].tabIconDefault : backgroundColor,
+          borderColor: disabled ? colors.buttonDisabled : colors.buttonPrimary,
         };
+      default:
+        return baseStyle;
     }
   };
   
   const getTextColor = () => {
     if (disabled) {
-      return Colors[theme].tabIconDefault;
+      return colors.textTertiary;
     }
     
     switch (variant) {
       case 'primary':
-        return Colors[theme].buttonText;
+        return colors.buttonText;
       case 'secondary':
-        return Colors[theme].tint;
+        return colors.buttonTextSecondary;
       case 'outline':
-        return backgroundColor;
+        return colors.buttonTextSecondary;
+      default:
+        return colors.text;
     }
   };
 
@@ -132,12 +123,13 @@ export function Button(props: ButtonProps) {
 
 export function TextInput(props: TextInputProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const { colors } = useTheme();
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'inputBackground');
 
   return (
     <DefaultTextInput
-      style={[{ backgroundColor }, style]}
-      placeholderTextColor={Colors.light.text}
+      style={[{ backgroundColor, color: colors.inputText }, style]}
+      placeholderTextColor={colors.inputPlaceholder}
       {...otherProps}
     />
   );

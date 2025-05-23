@@ -1,19 +1,11 @@
 import { TextInputProps, StyleSheet } from 'react-native';
 import { TextInput } from './Themed';
-import { useThemeColor } from './Themed';
+import { useTheme } from './ThemeProvider';
 import { useState } from 'react';
-import Colors from '@/constants/Colors';
-import { useColorScheme } from './useColorScheme';
 
 export default function StyledTextInput(props: TextInputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const theme = useColorScheme() ?? 'light';
-  
-  const borderColor = useThemeColor({}, 'textInputBorderColor') as string;
-  const backgroundColor = useThemeColor({}, 'textInputBackground') as string;
-  const textColor = useThemeColor({}, 'textInputText') as string;
-  const placeholderColor = useThemeColor({}, 'textInputPlaceholder') as string;
-  const focusedBorderColor = Colors[theme].textInputFocusedBorderColor;
+  const { colors } = useTheme();
 
   return (
     <TextInput
@@ -26,13 +18,13 @@ export default function StyledTextInput(props: TextInputProps) {
         setIsFocused(false);
         props.onBlur?.(e);
       }}
-      placeholderTextColor={placeholderColor}
+      placeholderTextColor={colors.inputPlaceholder}
       style={[
         styles.input,
         {
-          backgroundColor,
-          borderColor: isFocused ? focusedBorderColor : borderColor,
-          color: textColor,
+          backgroundColor: colors.inputBackground,
+          borderColor: isFocused ? colors.inputBorderFocused : colors.inputBorder,
+          color: colors.inputText,
         },
         props.style,
       ]}

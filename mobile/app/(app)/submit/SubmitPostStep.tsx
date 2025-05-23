@@ -6,6 +6,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Button, Dimensions, FlatList, KeyboardAvoidingView, NativeScrollEvent, NativeSyntheticEvent, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useThemedStyles } from '@/components/useThemedStyles';
+import { useTheme } from '@/components/ThemeProvider';
+import { ColorTheme } from '@/constants/Colors';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

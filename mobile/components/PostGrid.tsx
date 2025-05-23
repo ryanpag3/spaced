@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, RefreshControl, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, View } from './Themed';
+import { Text, View, useTheme } from './Themed';
+import { useThemedStyles } from './useThemedStyles';
 import AuthService from '@/services/AuthService';
 import SpacedApi from '@/api/spaced';
 import Config from 'react-native-config';
@@ -36,6 +37,8 @@ export interface PostsResponse {
 
 export default function PostGrid() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -256,15 +259,15 @@ export default function PostGrid() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => fetchPosts(true)}
-          tintColor="#666"
+          tintColor={colors.activityIndicator}
           title="Refreshing posts..."
         />
       }
-      ListFooterComponent={loading && !refreshing ? <ActivityIndicator style={styles.loader} /> : null}
+      ListFooterComponent={loading && !refreshing ? <ActivityIndicator style={styles.loader} color={colors.activityIndicator} /> : null}
       ListEmptyComponent={
         loading && !refreshing ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color="#666" />
+            <ActivityIndicator size="large" color={colors.activityIndicator} />
             <Text style={{marginTop: 10}}>Loading posts...</Text>
           </View>
         ) : null
@@ -274,7 +277,7 @@ export default function PostGrid() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   list: {
     width: '100%',
     flex: 1,
@@ -283,7 +286,7 @@ const styles = StyleSheet.create({
     width: tileSize,
     height: tileSize,
     margin: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.surface,
   },
   image: {
     width: '100%',
@@ -292,10 +295,10 @@ const styles = StyleSheet.create({
   noImagePlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.backgroundTertiary,
   },
   noImageText: {
-    color: '#666',
+    color: colors.textSecondary,
     fontSize: 12,
   },
   center: {
@@ -309,24 +312,24 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#d32f2f',
+    color: colors.error,
     marginBottom: 16,
     textAlign: 'center',
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 16,
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.tint,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 4,
   },
   retryButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },
