@@ -17,6 +17,7 @@ export default function LinkButton({
   variant = 'link',
   ...props
 }: LinkButtonProps) {
+
   const containerStyle = () => {
     switch (variant) {
       case 'primary':
@@ -28,7 +29,7 @@ export default function LinkButton({
         return styles.linkButton;
     }
   };
-  
+
   const textStyleByVariant = () => {
     switch (variant) {
       case 'primary':
@@ -42,14 +43,11 @@ export default function LinkButton({
   };
 
   return (
-    <Link
-      href={href}
-      {...props}
-    >
-      <TouchableOpacity style={[containerStyle(), style]}>
+    <TouchableOpacity style={[containerStyle(), style]}>
+      <Link href={href}>
         <Text style={[textStyleByVariant(), textStyle]}>{children}</Text>
-      </TouchableOpacity>
-    </Link>
+      </Link>
+    </TouchableOpacity >
   );
 }
 
@@ -76,6 +74,9 @@ const styles = StyleSheet.create({
   },
   linkButton: {
     padding: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent'
   },
   primaryText: {
     color: 'white',
