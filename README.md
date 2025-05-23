@@ -1,43 +1,34 @@
 # Spaced
 
-## API Documentation
+Spaced is a modern media sharing platform that allows users to securely store, organize, and share their photos and videos. The application features a responsive mobile interface and a robust API backend.
 
-### Pagination
+## Project Structure
 
-The Spaced API uses cursor-based pagination for listing posts and other content. Cursor-based pagination provides the following benefits:
+The project is organized into two main modules:
 
-- Better performance for large datasets
-- Consistent results even when items are added or removed
-- Prevents skipping items when using "load more" functionality
+### API (Backend)
 
-#### How to use pagination
+The backend is built with NestJS and uses Prisma ORM for database interactions. It consists of the following modules:
 
-When making a request to endpoints that support pagination (such as `/posts`), you can include the following query parameters:
+- **Auth**: Handles user authentication, login, and registration
+- **Users**: Manages user profiles, settings, and account information
+- **Media**: Processes and stores media files (images, videos)
+- **Post**: Manages user posts, comments, and reactions
+- **S3**: Handles cloud storage integration for media files
+- **Common**: Contains shared utilities, middleware, and common functionality
+- **DB**: Database connections and configurations
 
-- `size`: Number of items to return per page (default: 20)
-- `nextPageToken`: Cursor token for the next page of results
+### Mobile (Frontend)
 
-Example request:
-```
-GET /posts?feedType=profile&size=10&nextPageToken=post-123
-```
+The mobile application is built using React Native with Expo. It consists of the following modules:
 
-The response will include:
+- **API**: Contains API clients for interacting with the backend
+- **Components**: Reusable UI components
+- **Services**: Core business logic services including authentication and media handling
+- **Lib**: Utility functions for cryptography and authentication
+- **Constants**: Application-wide constants and theme configuration
+- **Assets**: Static resources like images and fonts
 
-```json
-{
-  "posts": [...],
-  "nextPageToken": "post-456",
-  "total": 100
-}
-```
+## Development
 
-To fetch the next page, use the `nextPageToken` value from the previous response:
-
-```
-GET /posts?feedType=profile&size=10&nextPageToken=post-456
-```
-
-When there are no more results, the `nextPageToken` field will be omitted from the response.
-
-Stay tuned for more documentation!
+The project uses Docker for containerization and TypeScript for type safety across both frontend and backend. The database schema is managed through Prisma migrations.
