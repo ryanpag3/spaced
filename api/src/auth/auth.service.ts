@@ -28,8 +28,12 @@ export class AuthService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  async respondSuccess(res: Response, userId: string) {
-    const token = this.jwtService.sign({ sub: userId });
+  async respondSuccess(res: Response, userId: string, username?: string) {
+    const payload = { 
+      sub: userId,
+      username 
+    };
+    const token = this.jwtService.sign(payload);
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -5,7 +5,7 @@ import { useAuth } from '@/components/useAuth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -27,6 +27,9 @@ export default function Profile() {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.title}>My Profile</Text>
+        {user?.username && (
+          <Text style={styles.username}>@{user.username}</Text>
+        )}
       </View>
       <View style={styles.gridContainer}>
         <PostGrid />
@@ -50,6 +53,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  username: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
   },
   gridContainer: {
     flex: 1,
