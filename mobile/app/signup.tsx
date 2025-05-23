@@ -1,71 +1,77 @@
-import StyledTextInput from '@/components/StyledTextInput';
-import { Button, View, Text } from '@/components/Themed';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/components/useAuth';
 import { useRouter } from 'expo-router';
 import { faker } from '@faker-js/faker';
+import FormField from '@/components/FormField';
+import LinkButton from '@/components/LinkButton';
+import AuthForm from '@/components/AuthForm';
+import Screen from '@/components/Screen';
+import { validateEmail, validatePassword, validatePasswordsMatch, validateUsername } from '@/utils/validation';
 
 export default function SignUp() {
   const { signUp } = useAuth();
   const router = useRouter();
 
   const genPassword = faker.internet.password();
-  const [username, setUsername] = useState(faker.internet.username());
+  const [username, setUsername] = useState(faker.internet.userName());
   const [email, setEmail] = useState(faker.internet.email());
   const [password, setPassword] = useState(genPassword);
   const [confirmPassword, setConfirmPassword] = useState(genPassword);
-  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateEmail = (email: string) => {
-    // Simple email regex for basic validation
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const validateForm = () => {
-    if (!email || !password || !confirmPassword) {
-      setError('All fields are required');
-      return false;
+  const validateForm = (): { isValid: boolean; errorMessage: string } => {
+    if (!username || !email || !password || !confirmPassword) {
+      return { isValid: false, errorMessage: 'All fields are required' };
     }
 
     if (!validateEmail(email)) {
-      setError('Invalid email format');
-      return false;
+      return { isValid: false, errorMessage: 'Invalid email format' };
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return false;
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return { isValid: false, errorMessage: passwordValidation.message };
     }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return false;
+    if (!validatePasswordsMatch(password, confirmPassword)) {
+      return { isValid: false, errorMessage: 'Passwords do not match' };
     }
 
-    setError('');
-    return true;
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+      return { isValid: false, errorMessage: usernameValidation.message };
+    }
+
+    return { isValid: true, errorMessage: '' };
   };
 
   const onSubmit = async () => {
-    if (validateForm()) {
-      try {
-        await signUp(username, email, password);
-        router.replace("/(app)/(tabs)/home");
-      } catch (e) {
-        console.log(e);
-        setError('An error occurred');
-      }
+    const { isValid, errorMessage } = validateForm();
+    
+    if (!isValid) {
+      throw new Error(errorMessage);
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      await signUp(username, email, password);
+      router.replace("/(app)/(tabs)/home");
+    } catch (e) {
+      setIsSubmitting(false);
+      throw e;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <StyledTextInput
-          style={styles.input}
+    <Screen center>
+      <AuthForm
+        submitLabel="Sign Up"
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
           placeholder="Username"
           autoCapitalize="none"
           autoCorrect={false}
@@ -73,8 +79,7 @@ export default function SignUp() {
           value={username}
           onChangeText={setUsername}
         />
-        <StyledTextInput
-          style={styles.input}
+        <FormField
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -85,50 +90,33 @@ export default function SignUp() {
           value={email}
           onChangeText={setEmail}
         />
-        <StyledTextInput
-          style={styles.input}
+        <FormField
           placeholder="Password"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+          returnKeyType="next"
         />
-        <StyledTextInput
-          style={styles.input}
+        <FormField
           placeholder="Confirm Password"
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          returnKeyType="done"
         />
-        <Button
-          onPress={onSubmit}
-          style={{ padding: 10, borderRadius: 5, width: '80%' }}
-        >Sign Up</Button>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      </View>
-    </SafeAreaView>
-  )
+        <LinkButton
+          href="/login"
+          style={styles.linkButton}
+        >
+          Already have an account? Log In
+        </LinkButton>
+      </AuthForm>
+    </Screen>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  formContainer: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 10
-  },
-  input: {
-    width: '80%',
-    padding: 10
-  },
-  errorText: {
-    position: 'absolute',
-    bottom: -30,
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center'
+  linkButton: {
+    marginTop: 16,
   }
-})
+});

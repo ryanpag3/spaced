@@ -1,10 +1,12 @@
-import { Alert, SafeAreaView, StyleSheet } from 'react-native';
-import { Text, View, Button } from '@/components/Themed';
-import StyledTextInput from '@/components/StyledTextInput';
+import { StyleSheet } from 'react-native';
 import { useState } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/components/useAuth';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import FormField from '@/components/FormField';
+import LinkButton from '@/components/LinkButton';
+import AuthForm from '@/components/AuthForm';
+import Screen from '@/components/Screen';
+import { validateEmail } from '@/utils/validation';
 
 export default function Login() {
   const router = useRouter();
@@ -12,47 +14,46 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateEmail = (email: string) => {
-    // Simple email regex for basic validation
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const validateForm = () => {
+  const validateForm = (): { isValid: boolean; errorMessage: string } => {
     if (!email || !password) {
-      setError('All fields are required');
-      return false;
+      return { isValid: false, errorMessage: 'All fields are required' };
     }
 
     if (!validateEmail(email)) {
-      setError('Invalid email format');
-      return false;
+      return { isValid: false, errorMessage: 'Invalid email format' };
     }
 
-    setError('');
-    return true;
+    return { isValid: true, errorMessage: '' };
   };
 
   const onSubmit = async () => {
-    if (validateForm()) {
-      // Handle form submission
-      try {
-        await signIn(email, password);
-        router.replace("/(app)/(tabs)/home");
-      } catch (e) {
-        console.log(e);
-        setError('An error occurred');
-      }
+    const { isValid, errorMessage } = validateForm();
+    
+    if (!isValid) {
+      throw new Error(errorMessage);
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      await signIn(email, password);
+      router.replace("/(app)/(tabs)/home");
+    } catch (e) {
+      setIsSubmitting(false);
+      throw e;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <StyledTextInput
-          style={styles.input}
+    <Screen center>
+      <AuthForm
+        submitLabel="Login"
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+      >
+        <FormField
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -63,47 +64,26 @@ export default function Login() {
           value={email}
           onChangeText={setEmail}
         />
-        <StyledTextInput
-          style={styles.input}
+        <FormField
           placeholder="Password"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+          returnKeyType="done"
         />
-        <Button
-          onPress={onSubmit}
-          style={{ padding: 10, borderRadius: 5, width: '80%' }}
-        >Login</Button>
-        <Link
+        <LinkButton
           href="/signup"
-          style={{ padding: 10, borderRadius: 5, width: '80%', textAlign: 'center' }}
-        >Don't have an account? Sign Up</Link>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      </View>
-    </SafeAreaView>
-    )
-};
+          style={styles.linkButton}
+        >
+          Don't have an account? Sign Up
+        </LinkButton>
+      </AuthForm>
+    </Screen>
+  );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  formContainer: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 10
-  },
-  input: {
-    width: '80%',
-    padding: 10
-  },
-  errorText: {
-    position: 'absolute',
-    bottom: -30,
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center'
+  linkButton: {
+    marginTop: 16,
   }
-})
+});

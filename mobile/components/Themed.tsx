@@ -7,6 +7,7 @@ import {
   Text as DefaultText,
   View as DefaultView,
   TouchableOpacity,
+  TouchableOpacityProps,
   TextInput as DefaultTextInput
 } from 'react-native';
 
@@ -50,20 +51,55 @@ export function View(props: ViewProps) {
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
-export function Button(props: any) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+export type ButtonProps = ThemeProps & TouchableOpacityProps & {
+  variant?: 'primary' | 'secondary' | 'outline';
+};
+
+export function Button(props: ButtonProps) {
+  const { style, lightColor, darkColor, variant = 'primary', ...otherProps } = props;
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'buttonBackground');
+  
+  const getButtonStyles = () => {
+    switch (variant) {
+      case 'primary':
+        return {
+          backgroundColor,
+          alignItems: 'center' as const,
+          justifyContent: 'center' as const,
+          padding: 12,
+          borderRadius: 8,
+        };
+      case 'secondary':
+        return {
+          backgroundColor: Colors.light.tint,
+          alignItems: 'center' as const,
+          justifyContent: 'center' as const,
+          padding: 12,
+          borderRadius: 8,
+        };
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          alignItems: 'center' as const,
+          justifyContent: 'center' as const,
+          padding: 12,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: backgroundColor,
+        };
+    }
+  };
+  
+  const getTextColor = () => {
+    return variant === 'outline' ? backgroundColor : Colors.light.buttonText;
+  };
 
   return (
     <TouchableOpacity
-      style={[{ 
-        backgroundColor,
-        alignItems: 'center',
-        justifyContent: 'center',
-       }, style]}
+      style={[getButtonStyles(), style]}
       {...otherProps} 
     >
-      <Text style={{ color: Colors.light.buttonText }}>{props.children}</Text>
+      <Text style={{ color: getTextColor() }}>{props.children}</Text>
     </TouchableOpacity>
   );
 }
