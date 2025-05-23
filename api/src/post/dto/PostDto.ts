@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsArray, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsOptional, IsString, IsUUID } from 'class-validator';
 
 @Exclude()
 export class PostDto {
@@ -24,4 +24,10 @@ export class PostDto {
   @IsArray()
   @IsUUID(4, { each: true })
   mediaIds: string[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  mediaUris?: string[];
 }

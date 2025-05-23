@@ -140,7 +140,7 @@ describe('MediaController', () => {
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
 
-      const result = await controller.getMediaByDirectFilename(
+      const result = await controller.getMediaByPath(
         mockFilename,
         mockResponse as any,
       );
@@ -181,7 +181,7 @@ describe('MediaController', () => {
       (prisma.media.findUnique as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
 
-      const result = await controller.getMediaByDirectFilename(
+      const result = await controller.getMediaByPath(
         mockId,
         mockResponse as any,
       );
@@ -221,7 +221,7 @@ describe('MediaController', () => {
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
 
-      const result = await controller.getMediaByDirectFilename(
+      const result = await controller.getMediaByPath(
         mockFilename,
         mockResponse as any,
       );
@@ -253,7 +253,7 @@ describe('MediaController', () => {
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
 
       await expect(
-        controller.getMediaByDirectFilename(mockFilename, mockResponse as any),
+        controller.getMediaByPath(mockFilename, mockResponse as any),
       ).rejects.toThrow(NotFoundException);
     });
   });

@@ -6,12 +6,10 @@ import AuthService from '@/services/AuthService';
 import SpacedApi from '@/api/spaced';
 import Config from 'react-native-config';
 
-// Define the number of columns in the grid
 const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const tileSize = screenWidth / numColumns;
 
-// Post types
 export interface Media {
   id: string;
   s3Key: string;
@@ -37,8 +35,8 @@ export interface PostsResponse {
 
 export default function PostGrid() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true); // Start with loading state
-  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +48,6 @@ export default function PostGrid() {
     
     if (refresh) {
       setRefreshing(true);
-      // Reset state for refresh
       setPosts([]);
       setNextPageToken(undefined);
       setHasMore(true);
@@ -61,7 +58,6 @@ export default function PostGrid() {
     }
     
     try {
-      // Use the withToken helper to handle token retrieval and error handling
       const response = await AuthService.withToken(token => {
         const pageToken = refresh ? undefined : nextPageToken;
         return SpacedApi.getPosts(token, 'profile', 20, pageToken);
@@ -79,7 +75,6 @@ export default function PostGrid() {
 
         console.log(JSON.stringify(data, null, 4));
         
-        // Log detailed information about the first post to help debug
         if (data?.posts?.length > 0) {
           const firstPost = data.posts[0];
           console.log('First post details:', {
@@ -99,23 +94,18 @@ export default function PostGrid() {
         throw new Error('Failed to parse server response');
       }
       
-      // Ensure we have a valid response with posts array
       if (!data || !Array.isArray(data.posts)) {
         console.error('Invalid data format:', data);
         throw new Error('Received invalid data format from server');
       }
       
-      // Process the posts to ensure they all have valid media arrays
       const processedPosts = data.posts.map(post => {
-        // If post doesn't have a media array, create an empty one
         if (!post.media || !Array.isArray(post.media)) {
           post.media = [];
         }
         
-        // If post has mediaUris but no media objects, try to create media objects
         if ((!post.media || post.media.length === 0) && 
             post.mediaUris && Array.isArray(post.mediaUris) && post.mediaUris.length > 0) {
-          // For debugging - we should handle this case differently
           console.log('Post has mediaUris but no media objects:', post.id);
         }
         
@@ -147,24 +137,17 @@ export default function PostGrid() {
     
     loadInitialPosts();
     
-    // Cleanup function
     return () => {
       isMounted = false;
     };
   }, []);
 
   const renderItem = ({ item }: { item: Post }) => {
-    // Create accessible image URLs for any post that has mediaUris
-    // Since the API returns mediaUris as array of s3Keys, we need to check if they
-    // have media array with IDs we can use
-    
-    // We'll try to find media with IDs first
     if (item.media && Array.isArray(item.media) && item.media.length > 0) {
       const firstMedia = item.media[0];
       
-      // Make sure the media has an ID
-      if (firstMedia && firstMedia.id) {
-        const imageUri = `${Config.API_URL}/media/${firstMedia.id}`;
+      if (firstMedia && firstMedia.s3Key) {
+        const imageUri = `${Config.API_URL}/media/${firstMedia.s3Key}`;
         return (
           <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
             <Image 
@@ -179,7 +162,22 @@ export default function PostGrid() {
       }
     }
     
-    // If we can't get a media ID, show placeholder
+    if (item.mediaUris && Array.isArray(item.mediaUris) && item.mediaUris.length > 0) {
+      const firstMediaUri = item.mediaUris[0];
+      const imageUri = `${Config.API_URL}/${firstMediaUri}`;
+      return (
+        <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
+          <Image 
+            source={{ uri: imageUri }} 
+            style={styles.image} 
+            contentFit="cover"
+            transition={300}
+            cachePolicy="memory-disk"
+          />
+        </TouchableOpacity>
+      );
+    }
+    
     return (
       <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
         <View style={[styles.image, styles.noImagePlaceholder]}>
@@ -189,8 +187,6 @@ export default function PostGrid() {
     );
   };
 
-  // Only render dedicated error or empty screens if we're not in a loading state
-  // This helps prevent flashing screens during refreshes
   if (error && !loading && !refreshing) {
     return (
       <View style={styles.center}>
@@ -205,7 +201,6 @@ export default function PostGrid() {
     );
   }
 
-  // If there are no posts, we have no error, and we're not loading
   if (posts.length === 0 && !error && !loading && !refreshing) {
     return (
       <View style={styles.center}>

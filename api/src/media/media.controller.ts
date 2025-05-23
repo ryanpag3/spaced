@@ -21,11 +21,12 @@ import prisma from '../db/prisma';
 import { Response } from 'express';
 import { Readable } from 'stream';
 import { MediaFileResponseDto, ErrorResponseDto } from './dto';
+import Public from 'src/common/decorators/public.decorator';
 
 @ApiTags('media')
 @Controller('media')
 export class MediaController {
-  constructor(private readonly s3Service: S3Service) {}
+  constructor(private readonly s3Service: S3Service) { }
 
   @Get(':id')
   @ApiOperation({
@@ -183,7 +184,7 @@ export class MediaController {
     }
   }
 
-  @Get(':filename')
+  @Get(':userId/:filename')
   @ApiOperation({
     summary: 'Get media by direct filename',
     description: 'Retrieves media file from S3 by its filename (useful for direct URLs in Image components)',
@@ -219,25 +220,21 @@ export class MediaController {
     'video/mp4',
     'application/octet-stream',
   )
-  async getMediaByDirectFilename(
+  @Public()
+  async getMediaByPath(
+    @Param('userId') userId: string,
     @Param('filename') filename: string,
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      // This route conflicts with getMedia by ID, so we first check if this looks like a UUID
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      
-      // If it looks like an ID without extension, pass to the getMedia handler
-      if (uuidRegex.test(filename) && !filename.includes('.')) {
-        return this.getMedia(filename, res);
-      }
-      
-      // Otherwise, look for a file with this filename
-      // Try to find the media by filename in s3Key
+      const s3Key = `/media/${userId}/${filename}`;
+
+      const s3KeyWithoutLeadingSlash = s3Key.startsWith('/') ? s3Key.substring(1) : s3Key;
+
       const media = await prisma.media.findFirst({
         where: {
           s3Key: {
-            endsWith: `/${filename}`,
+            endsWith: s3KeyWithoutLeadingSlash
           },
         },
       });
