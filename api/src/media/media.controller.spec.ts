@@ -5,8 +5,8 @@ jest.mock('@nestjs/common', () => {
     ...original,
     Controller: () => (target: any) => target,
     Get: () => (target: any) => target,
-    Param: () => (target: any, _propertyKey: string) => target,
-    Res: () => (target: any, _propertyKey: string) => target,
+    Param: () => (target: any) => target,
+    Res: () => (target: any) => target,
   };
 });
 
