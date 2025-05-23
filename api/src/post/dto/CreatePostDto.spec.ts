@@ -3,6 +3,39 @@ import { validate } from 'class-validator';
 import CreatePostDto from './CreatePostDto';
 
 describe('CreatePostDto', () => {
+  it('should pass validation with valid input including spaceId', async () => {
+    const dto = plainToInstance(CreatePostDto, {
+      description: 'Valid description',
+      tags: ['tag1', 'tag2'],
+      spaceId: '550e8400-e29b-41d4-a716-446655440000',
+    });
+
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+  });
+
+  it('should pass validation without spaceId', async () => {
+    const dto = plainToInstance(CreatePostDto, {
+      description: 'Valid description',
+      tags: ['tag1', 'tag2'],
+    });
+
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+  });
+
+  it('should fail validation with invalid spaceId format', async () => {
+    const dto = plainToInstance(CreatePostDto, {
+      description: 'Valid description',
+      tags: ['tag1', 'tag2'],
+      spaceId: 'invalid-uuid',
+    });
+
+    const errors = await validate(dto);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].property).toBe('spaceId');
+  });
+
   it('should pass validation with valid input', async () => {
     const dto = plainToInstance(CreatePostDto, {
       description: 'Valid description',

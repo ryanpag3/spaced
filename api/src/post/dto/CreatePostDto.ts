@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export default class CreatePostDto {
   @IsString()
@@ -18,4 +18,12 @@ export default class CreatePostDto {
     description: 'An array of strings representing the tags of the content.',
   })
   tags?: string[];
+
+  @IsUUID()
+  @IsOptional()
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'Optional space ID to assign the post to a specific space.',
+  })
+  spaceId?: string;
 }

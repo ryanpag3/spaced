@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedRequest } from '../common/types/request.type';
 import { S3Service } from '../s3/s3.service';
+import { SpaceService } from '../space/space.service';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
 
@@ -38,6 +39,11 @@ const mockPostService = {
   getProfilePosts: jest.fn(),
 };
 
+// Mock the SpaceService
+const mockSpaceService = {
+  findOne: jest.fn(),
+};
+
 describe('PostController', () => {
   let controller: PostController;
 
@@ -54,6 +60,10 @@ describe('PostController', () => {
         {
           provide: PostService,
           useValue: mockPostService,
+        },
+        {
+          provide: SpaceService,
+          useValue: mockSpaceService,
         },
       ],
     }).compile();
