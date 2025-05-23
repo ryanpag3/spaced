@@ -14,7 +14,7 @@ export default function SignUp() {
   const router = useRouter();
 
   const genPassword = faker.internet.password();
-  const [username, setUsername] = useState(faker.internet.userName());
+  const [username, setUsername] = useState(faker.internet.username());
   const [email, setEmail] = useState(faker.internet.email());
   const [password, setPassword] = useState(genPassword);
   const [confirmPassword, setConfirmPassword] = useState(genPassword);
@@ -117,6 +117,6 @@ export default function SignUp() {
 
 const styles = StyleSheet.create({
   linkButton: {
-    marginTop: 16,
-  }
+    marginTop: 24,
+  },
 });

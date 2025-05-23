@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import SpacedApi from '@/api/spaced';
-import { atob } from '@/lib/base64';
+import { jwtDecode } from 'jwt-decode';
 
 /**
  * A singleton service for handling authentication token operations
@@ -15,14 +15,9 @@ export default class AuthService {
    */
   private static parseToken(token: string): any {
     try {
-      // JWT tokens are in format: header.payload.signature
-      const base64Payload = token.split('.')[1];
-      // Replace URL-safe chars and add padding if needed
-      const base64 = base64Payload.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
+      // Use standard JWT library to decode the token
+      const decoded = jwtDecode(token);
+      return decoded;
     } catch (e) {
       console.error('Error parsing JWT token:', e);
       return null;

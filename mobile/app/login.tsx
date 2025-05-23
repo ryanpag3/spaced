@@ -84,6 +84,6 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   linkButton: {
-    marginTop: 16,
-  }
+    marginTop: 24,
+  },
 });

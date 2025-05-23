@@ -1,6 +1,7 @@
 import { StyleSheet, TextInputProps, View } from 'react-native';
 import { Text } from './Themed';
 import StyledTextInput from './StyledTextInput';
+import { useThemeColor } from './Themed';
 
 type FormFieldProps = TextInputProps & {
   label?: string;
@@ -13,11 +14,22 @@ export default function FormField({
   style,
   ...props
 }: FormFieldProps) {
+  const textColor = useThemeColor({}, 'text') as string;
+  const errorColor = useThemeColor({}, 'authErrorText') as string;
+
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={[styles.label, { color: textColor }]}>
+          {label}
+        </Text>
+      )}
       <StyledTextInput style={[styles.input, style]} {...props} />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && (
+        <Text style={[styles.errorText, { color: errorColor }]}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
@@ -25,18 +37,19 @@ export default function FormField({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   label: {
-    marginBottom: 4,
-    fontWeight: 'bold',
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
   input: {
     width: '100%',
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 14,
+    marginTop: 6,
+    fontWeight: '500',
   },
 });

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { View } from './Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeColor } from './Themed';
 
 type ScreenProps = {
   children: ReactNode;
@@ -19,11 +20,14 @@ export default function Screen({
   padding = true,
   center = false,
 }: ScreenProps) {
+  const authBackgroundColor = useThemeColor({}, 'authBackground') as string;
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: authBackgroundColor }]}>
       <View 
         style={[
           styles.container,
+          { backgroundColor: authBackgroundColor },
           padding && styles.padding,
           center && styles.center,
           style
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   padding: {
-    padding: 16,
+    padding: 24,
   },
   center: {
     justifyContent: 'center',
