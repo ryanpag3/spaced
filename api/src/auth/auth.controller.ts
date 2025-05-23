@@ -41,7 +41,11 @@ export class AuthController {
       }
       throw new BadRequestException('User creation failed');
     }
-    return this.authService.respondSuccess(res, userResult.id, userResult.username);
+    return this.authService.respondSuccess(
+      res,
+      userResult.id,
+      userResult.username,
+    );
   }
 
   @Post('login')

@@ -29,9 +29,9 @@ export class AuthService {
   }
 
   async respondSuccess(res: Response, userId: string, username?: string) {
-    const payload = { 
+    const payload = {
       sub: userId,
-      username 
+      username,
     };
     const token = this.jwtService.sign(payload);
     res.cookie('auth_token', token, {
