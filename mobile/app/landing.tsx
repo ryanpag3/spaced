@@ -1,33 +1,55 @@
-import { Button } from '@/components/Themed';
-import { useRouter } from 'expo-router';
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Themed';
+import LinkButton from '@/components/LinkButton';
+import Screen from '@/components/Screen';
 
 export default function Landing() {
-  const router = useRouter();
-
   return (
-    <SafeAreaView style={styles.container}>
-      <Button 
-        onPress={() => router.push('/login')}
-        style={styles.authButton}>Login</Button>
-      <Button 
-        onPress={() => router.push('/signup')}
-        style={styles.authButton}>Sign Up</Button>
-    </SafeAreaView>
+    <Screen center>
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome to Spaced</Text>
+        <Text style={styles.subtitle}>Connect and share with your friends</Text>
+        
+        <View style={styles.buttonsContainer}>
+          <LinkButton 
+            href="/login"
+            variant="primary"
+            style={styles.button}>
+            Login
+          </LinkButton>
+          <LinkButton 
+            href="/signup"
+            variant="secondary"
+            style={styles.button}>
+            Sign Up
+          </LinkButton>
+        </View>
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  content: {
     alignItems: 'center',
-    gap: 10
+    paddingHorizontal: 24,
   },
-  authButton: {
-    padding: 10,
-    borderRadius: 5,
-    width: 200
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 48,
+    textAlign: 'center',
+  },
+  buttonsContainer: {
+    width: '100%',
+    gap: 16,
+    alignItems: 'center',
+  },
+  button: {
+    width: 200,
   }
 });
