@@ -26,7 +26,7 @@ import Public from 'src/common/decorators/public.decorator';
 @ApiTags('media')
 @Controller('media')
 export class MediaController {
-  constructor(private readonly s3Service: S3Service) { }
+  constructor(private readonly s3Service: S3Service) {}
 
   @Get(':id')
   @ApiOperation({
@@ -187,11 +187,13 @@ export class MediaController {
   @Get(':userId/:filename')
   @ApiOperation({
     summary: 'Get media by direct filename',
-    description: 'Retrieves media file from S3 by its filename (useful for direct URLs in Image components)',
+    description:
+      'Retrieves media file from S3 by its filename (useful for direct URLs in Image components)',
   })
   @ApiParam({
     name: 'filename',
-    description: 'Filename of the media file with extension (e.g., ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg)',
+    description:
+      'Filename of the media file with extension (e.g., ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg)',
   })
   @ApiResponse({
     status: 200,
@@ -229,12 +231,14 @@ export class MediaController {
     try {
       const s3Key = `/media/${userId}/${filename}`;
 
-      const s3KeyWithoutLeadingSlash = s3Key.startsWith('/') ? s3Key.substring(1) : s3Key;
+      const s3KeyWithoutLeadingSlash = s3Key.startsWith('/')
+        ? s3Key.substring(1)
+        : s3Key;
 
       const media = await prisma.media.findFirst({
         where: {
           s3Key: {
-            endsWith: s3KeyWithoutLeadingSlash
+            endsWith: s3KeyWithoutLeadingSlash,
           },
         },
       });
@@ -248,7 +252,9 @@ export class MediaController {
         });
 
         if (!mediaByExactKey) {
-          throw new NotFoundException(`Media with filename ${filename} not found`);
+          throw new NotFoundException(
+            `Media with filename ${filename} not found`,
+          );
         }
 
         return this.serveMediaFile(mediaByExactKey.s3Key, mediaByExactKey, res);
@@ -256,7 +262,10 @@ export class MediaController {
 
       return this.serveMediaFile(media.s3Key, media, res);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       Logger.error(
@@ -280,7 +289,8 @@ export class MediaController {
       const { Body, ContentType } = await this.s3Service.getFile(s3Key);
 
       res.set({
-        'Content-Type': ContentType || media?.mimeType || 'application/octet-stream',
+        'Content-Type':
+          ContentType || media?.mimeType || 'application/octet-stream',
         'Content-Disposition': `inline; filename="${s3Key.split('/').pop()}"`,
         'Cache-Control': 'max-age=86400', // Cache for 24 hours
       });
