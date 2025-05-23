@@ -2,7 +2,8 @@ import { Image } from 'expo-image';
 import * as MediaLibrary from 'expo-media-library';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, View } from './Themed';
+import { Text, View, useTheme } from './Themed';
+import { useThemedStyles } from './useThemedStyles';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const numColumns = 3;
