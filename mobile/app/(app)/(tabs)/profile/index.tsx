@@ -1,11 +1,15 @@
 import { Text, View } from '@/components/Themed';
 import PostGrid from '@/components/PostGrid';
-import { StyleSheet } from 'react-native';
+import PostFeed from '@/components/PostFeed';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuth } from '@/components/useAuth';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { Entypo } from '@expo/vector-icons';
 
 export default function Profile() {
   const { isAuthenticated, loading, user } = useAuth();
+  const [viewMode, setViewMode] = useState<'grid' | 'feed'>('grid');
 
   if (loading) {
     return (
@@ -26,13 +30,29 @@ export default function Profile() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Profile</Text>
-        {user?.username && (
-          <Text style={styles.username}>@{user.username}</Text>
-        )}
+        <View style={styles.headerLeftSection}>
+          <Text style={styles.title}>My Profile</Text>
+          {user?.username && (
+            <Text style={styles.username}>@{user.username}</Text>
+          )}
+        </View>
+        <View style={styles.viewToggle}>
+          <TouchableOpacity 
+            style={[styles.toggleButton, viewMode === 'grid' && styles.toggleButtonActive]} 
+            onPress={() => setViewMode('grid')}
+          >
+            <Entypo name="grid" size={18} color={viewMode === 'grid' ? '#000' : '#999'} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.toggleButton, viewMode === 'feed' && styles.toggleButtonActive]} 
+            onPress={() => setViewMode('feed')}
+          >
+            <Entypo name="list" size={18} color={viewMode === 'feed' ? '#000' : '#999'} />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.gridContainer}>
-        <PostGrid />
+        {viewMode === 'grid' ? <PostGrid /> : <PostFeed />}
       </View>
     </SafeAreaView>
   );
@@ -49,6 +69,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeftSection: {
+    flex: 1,
   },
   title: {
     fontSize: 20,
@@ -61,5 +87,24 @@ const styles = StyleSheet.create({
   },
   gridContainer: {
     flex: 1,
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#f2f2f2',
+    borderRadius: 8,
+    padding: 2,
+  },
+  toggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  toggleButtonActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
   },
 });
