@@ -1,6 +1,7 @@
 import { AuthProvider } from '@/components/useAuth';
 import { useColorScheme } from '@/components/useColorScheme';
 import { SelectedAlbumsProvider } from '@/components/useSelectedAlbums';
+import { ThemeProvider as CustomThemeProvider } from '@/components/ThemeProvider';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -43,13 +44,15 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <SelectedAlbumsProvider>
-            <RootLayoutNav />
-          </SelectedAlbumsProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
+      <CustomThemeProvider>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <SelectedAlbumsProvider>
+              <RootLayoutNav />
+            </SelectedAlbumsProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </CustomThemeProvider>
     </ThemeProvider>
   );
 }
