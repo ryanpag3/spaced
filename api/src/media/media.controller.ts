@@ -170,7 +170,10 @@ export class MediaController {
         throw new NotFoundException('Media file not found in storage');
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       Logger.error(

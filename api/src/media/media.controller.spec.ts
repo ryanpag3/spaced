@@ -5,8 +5,8 @@ jest.mock('@nestjs/common', () => {
     ...original,
     Controller: () => (target: any) => target,
     Get: () => (target: any) => target,
-    Param: () => (target: any, propertyKey: string) => target,
-    Res: () => (target: any, propertyKey: string) => target,
+    Param: () => (target: any, _propertyKey: string) => target,
+    Res: () => (target: any, _propertyKey: string) => target,
   };
 });
 
@@ -263,7 +263,11 @@ describe('MediaController', () => {
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
 
       await expect(
-        controller.getMediaByPath(mockUserId, mockFilename, mockResponse as any),
+        controller.getMediaByPath(
+          mockUserId,
+          mockFilename,
+          mockResponse as any,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });
