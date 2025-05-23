@@ -84,10 +84,7 @@ describe('PostService', () => {
       expect(result).toBeDefined();
       expect(result.posts).toHaveLength(2);
       expect(result.posts[0].id).toBe('post-id-1');
-      expect(result.posts[0].mediaIds).toEqual([
-        'media-1',
-        'media-2',
-      ]);
+      expect(result.posts[0].mediaIds).toEqual(['media-1', 'media-2']);
       expect(result.total).toBe(mockCount);
       expect(result.nextPageToken).toBeUndefined();
     });
