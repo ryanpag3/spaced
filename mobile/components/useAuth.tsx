@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import Auth from '@/lib/auth';
+import AuthService from '@/services/AuthService';
 
 interface AuthUser {
     id: string;
@@ -23,12 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkAuthState = async () => {
         try {
-            const token = await SecureStore.getItemAsync('auth.token');
-            if (token) {
-                setIsAuthenticated(true);
-            } else {
-                setIsAuthenticated(false);
-            }
+            const isAuthenticated = await AuthService.isAuthenticated();
+            setIsAuthenticated(isAuthenticated);
         }
         catch (error) {
             console.error('Error checking auth state:', error);
@@ -38,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signIn = async (email: string, password: string) => {
         try {
-            await Auth.login(email, password);
+            await AuthService.signIn(email, password);
             setIsAuthenticated(true);
         } catch (e) {
             setIsAuthenticated(false);
@@ -48,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signUp = async (username: string, email: string, password: string) => {
         try {
-            await Auth.signUp(username, email, password);
+            await AuthService.signUp(username, email, password);
             setIsAuthenticated(true);
         } catch (e) {
             setIsAuthenticated(false);
@@ -58,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = async () => {
         try {
-            await Auth.logout();
+            await AuthService.signOut();
         } catch (error) {
             throw error;
         } finally {

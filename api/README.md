@@ -71,6 +71,57 @@ $ mau deploy
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
+## How to Use the Media Endpoints
+
+The MediaController now provides two endpoints to serve media files directly from S3:
+
+1. **Get media by ID**: `GET /media/:id`
+   - Retrieves media by its database ID
+   - Example: `GET http://localhost:3000/media/1234-5678-9012`
+
+2. **Get media by S3 key**: `GET /media/key/:key`
+   - Retrieves media directly by its S3 key
+   - Example: `GET http://localhost:3000/media/key/uploads/myimage.jpg`
+
+### Postman Example
+
+You can test these endpoints in Postman:
+
+1. Create a new GET request to `http://localhost:3000/media/:id` replacing `:id` with a valid media ID
+2. Send the request, and you should receive the file in the response
+3. For direct S3 key access, use `http://localhost:3000/media/key/:key` replacing `:key` with the S3 key
+
+### Integration with Frontend
+
+In your frontend application, you can use these endpoints to display images:
+
+```html
+<img src="http://localhost:3000/media/1234-5678-9012" alt="My Image">
+```
+
+Or with the S3 key:
+
+```html
+<img src="http://localhost:3000/media/key/uploads/myimage.jpg" alt="My Image">
+```
+
+### API Documentation with Swagger
+
+The API documentation is available through Swagger UI. To access it, start the API server and navigate to:
+
+```
+http://localhost:3000/api
+```
+
+The documentation includes details about:
+
+1. Available endpoints
+2. Request parameters
+3. Response formats and examples
+4. Error responses
+
+This makes it easy to test the API endpoints directly from the browser without needing additional tools like Postman.
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:

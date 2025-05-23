@@ -18,6 +18,7 @@ export default function GalleryGrid({
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [selected, setSelected] = useState<{[id: string]: MediaLibrary.Asset}>({});
+  const [pendingDetailFetches, setPendingDetailFetches] = useState<{[id: string]: boolean}>({});
 
   useEffect(() => {
     (async () => {
@@ -45,20 +46,55 @@ export default function GalleryGrid({
     setLoading(false);
   }
 
-  const toggleSelect = async (asset: MediaLibrary.Asset) => {
-    if (selected[asset.id]) {
-      delete selected[asset.id];
-    } else {
-      // Get detailed asset info only when selected
+  // Use a separate function to fetch asset details asynchronously
+  const fetchAssetDetails = async (asset: MediaLibrary.Asset) => {
+    if (pendingDetailFetches[asset.id]) return;
+    
+    try {
+      setPendingDetailFetches(prev => ({ ...prev, [asset.id]: true }));
       const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-      selected[asset.id] = assetInfo;
+      
+      setSelected(prev => {
+        const updated = { ...prev, [asset.id]: assetInfo };
+        onSelectedAssetsChanged(Object.values(updated));
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error fetching asset details:', error);
+    } finally {
+      setPendingDetailFetches(prev => {
+        const updated = { ...prev };
+        delete updated[asset.id];
+        return updated;
+      });
     }
-    setSelected({...selected});
-    onSelectedAssetsChanged(Object.values(selected));
+  };
+
+  const toggleSelect = (asset: MediaLibrary.Asset) => {
+    if (selected[asset.id]) {
+      // Remove from selection immediately for responsive UI
+      setSelected(prev => {
+        const updated = { ...prev };
+        delete updated[asset.id];
+        onSelectedAssetsChanged(Object.values(updated));
+        return updated;
+      });
+    } else {
+      // Add basic asset to selection immediately for UI responsiveness
+      setSelected(prev => {
+        const updated = { ...prev, [asset.id]: asset };
+        onSelectedAssetsChanged(Object.values(updated));
+        return updated;
+      });
+      
+      // Fetch detailed info asynchronously
+      fetchAssetDetails(asset);
+    }
   };
 
   const renderItem = ({ item }: { item: MediaLibrary.Asset }) => {
     const isSelected = selected[item.id] !== undefined;
+    
     return (
       <TouchableOpacity
         style={styles.tile}
@@ -138,6 +174,12 @@ const styles = StyleSheet.create({
   selectedOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center',
     justifyContent: 'center',
   },
