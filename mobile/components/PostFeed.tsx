@@ -7,10 +7,12 @@ import SpacedApi from '@/api/spaced';
 import Config from 'react-native-config';
 import { Post, PostsResponse } from './PostGrid';
 import { format } from 'date-fns';
+import { useRouter } from 'expo-router';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function PostFeed() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -157,8 +159,22 @@ export default function PostFeed() {
     const mediaUris = getMediaUris(item);
     const currentMediaIndex = mediaIndices[item.id] || 0;
     
+    const navigateToPost = () => {
+      router.push({
+        pathname: "/(app)/post/[id]",
+        params: {
+          id: item.id,
+          post: JSON.stringify(item)
+        }
+      });
+    };
+    
     return (
-      <View style={styles.postCard}>
+      <TouchableOpacity 
+        style={styles.postCard}
+        activeOpacity={0.95}
+        onPress={navigateToPost}
+      >
         {mediaUris.length > 0 ? (
           <RNView style={styles.mediaContainer}>
             <FlatList
@@ -169,6 +185,8 @@ export default function PostFeed() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={handleMediaScroll(item.id)}
+              // Prevent touch propagation to parent TouchableOpacity
+              onTouchStart={e => e.stopPropagation()}
             />
             {mediaUris.length > 1 && (
               <RNView style={styles.paginationContainer}>
@@ -205,7 +223,7 @@ export default function PostFeed() {
             </View>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 

@@ -6,3 +6,4 @@
 - Constants will be in all caps with underscores
 - All functions will be in camelCase
 - The code should be as self-documenting as possible. Only use comments when absolutely necessary.
+- Always run "organize imports" after editing each file
