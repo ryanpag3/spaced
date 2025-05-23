@@ -183,11 +183,13 @@ export class PostController {
   async list(
     @Req() request: AuthenticatedRequest,
     @Query('feedType') feedType: 'profile' | 'space' | 'home',
-    @Query('size') size: number = 20,
+    @Query('size') sizeStr: string = '20',
     @Query('filter') filter?: string,
     @Query('nextPageToken') nextPageToken?: string,
   ): Promise<ListPostDto> {
     const userId = request.user.id;
+    // Convert size to a number
+    const size = parseInt(sizeStr, 10) || 20;
 
     switch (feedType) {
       case 'profile':

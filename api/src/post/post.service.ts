@@ -43,12 +43,12 @@ export class PostService {
       posts.pop(); // Remove the extra item
     }
 
-    // Transform to DTOs and add media URIs
+    // Transform to DTOs and add media IDs
     const postDtos = posts.map((post) => {
-      const mediaUris = post.media.map((media) => media.s3Key);
+      const mediaIds = post.media.map((media) => media.id);
       const dto = plainToInstance(PostDto, {
         ...post,
-        mediaUris,
+        mediaIds,
       });
       return dto;
     });

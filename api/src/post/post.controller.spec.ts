@@ -239,14 +239,14 @@ describe('PostController', () => {
           description: 'First post',
           authorId: 'user-456',
           tags: ['test'],
-          mediaUris: ['media/user-456/image1.jpg'],
+          mediaIds: ['media-id-1'],
         },
         {
           id: 'post-2',
           description: 'Second post',
           authorId: 'user-456',
           tags: ['sample'],
-          mediaUris: ['media/user-456/image2.jpg'],
+          mediaIds: ['media-id-2'],
         },
       ],
       nextPageToken: 'post-2',
@@ -265,7 +265,7 @@ describe('PostController', () => {
       const result = await controller.list(
         mockRequest,
         'profile',
-        20,
+        '20',
         undefined,
         undefined,
       );
@@ -285,7 +285,7 @@ describe('PostController', () => {
 
       // Call with cursor
       const cursor = 'post-1';
-      await controller.list(mockRequest, 'profile', 10, undefined, cursor);
+      await controller.list(mockRequest, 'profile', '10', undefined, cursor);
 
       // Verify cursor was passed
       expect(mockPostService.getProfilePosts).toHaveBeenCalledWith(

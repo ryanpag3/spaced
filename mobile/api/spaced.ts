@@ -57,4 +57,27 @@ export default class SpacedApi {
             }
         });
     }
+
+    static async getPosts(token: string, feedType: 'profile' | 'space' | 'home', size: number = 20, nextPageToken?: string) {
+        let url = `${Config.API_URL}/posts?feedType=${feedType}&size=${size}`;
+        
+        if (nextPageToken) {
+            url += `&nextPageToken=${nextPageToken}`;
+        }
+        
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            return response;
+        } catch (error) {
+            console.error('Network error fetching posts:', error);
+            throw error;
+        }
+    }
 }

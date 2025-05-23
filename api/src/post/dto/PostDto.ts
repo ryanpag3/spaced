@@ -22,6 +22,6 @@ export class PostDto {
 
   @Expose()
   @IsArray()
-  @IsString({ each: true })
-  mediaUris: string[];
+  @IsUUID(4, { each: true })
+  mediaIds: string[];
 }
