@@ -73,6 +73,7 @@ describe('AuthController', () => {
       expect(authService.respondSuccess).toHaveBeenCalledWith(
         res,
         createdUser.id,
+        createdUser.username,
       );
     });
 
