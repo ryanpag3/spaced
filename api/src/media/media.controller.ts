@@ -21,7 +21,7 @@ import prisma from '../db/prisma';
 import { Response } from 'express';
 import { Readable } from 'stream';
 import { MediaFileResponseDto, ErrorResponseDto } from './dto';
-import Public from 'src/common/decorators/public.decorator';
+import Public from '../common/decorators/public.decorator';
 
 @ApiTags('media')
 @Controller('media')
@@ -170,7 +170,7 @@ export class MediaController {
         throw new NotFoundException('Media file not found in storage');
       }
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
       Logger.error(
@@ -269,7 +269,7 @@ export class MediaController {
         throw error;
       }
       Logger.error(
-        `Error in getMediaByDirectFilename: ${error.message}`,
+        `Error in getMediaByPath: ${error.message}`,
         error.stack,
         'MediaController',
       );
