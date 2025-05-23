@@ -5,6 +5,7 @@ import { Text, View } from './Themed';
 import AuthService from '@/services/AuthService';
 import SpacedApi from '@/api/spaced';
 import Config from 'react-native-config';
+import { useRouter } from 'expo-router';
 
 const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
@@ -34,6 +35,7 @@ export interface PostsResponse {
 }
 
 export default function PostGrid() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -145,13 +147,27 @@ export default function PostGrid() {
   }, []);
 
   const renderItem = ({ item }: { item: Post }) => {
+    const navigateToPost = () => {
+      router.push({
+        pathname: "/(app)/post/[id]",
+        params: {
+          id: item.id,
+          post: JSON.stringify(item)
+        }
+      });
+    };
+    
     if (item.media && Array.isArray(item.media) && item.media.length > 0) {
       const firstMedia = item.media[0];
       
       if (firstMedia && firstMedia.s3Key) {
         const imageUri = `${Config.API_URL}/media/${firstMedia.s3Key}`;
         return (
-          <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.tile} 
+            activeOpacity={0.8}
+            onPress={navigateToPost}
+          >
             <Image 
               source={{ uri: imageUri }} 
               style={styles.image} 
@@ -169,7 +185,11 @@ export default function PostGrid() {
       const firstMediaUri = item.mediaUris[0];
       const imageUri = `${Config.API_URL}/${firstMediaUri}`;
       return (
-        <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
+        <TouchableOpacity 
+          style={styles.tile} 
+          activeOpacity={0.8}
+          onPress={navigateToPost}
+        >
           <Image 
             source={{ uri: imageUri }} 
             style={styles.image} 
@@ -183,7 +203,11 @@ export default function PostGrid() {
     }
     
     return (
-      <TouchableOpacity style={styles.tile} activeOpacity={0.8}>
+      <TouchableOpacity 
+        style={styles.tile} 
+        activeOpacity={0.8}
+        onPress={navigateToPost}
+      >
         <View style={[styles.image, styles.noImagePlaceholder]}>
           <Text style={styles.noImageText}>No Image</Text>
         </View>
