@@ -182,4 +182,120 @@ export class MediaController {
       );
     }
   }
+
+  @Get(':filename')
+  @ApiOperation({
+    summary: 'Get media by direct filename',
+    description: 'Retrieves media file from S3 by its filename (useful for direct URLs in Image components)',
+  })
+  @ApiParam({
+    name: 'filename',
+    description: 'Filename of the media file with extension (e.g., ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The media file is returned as a stream',
+    type: MediaFileResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Media not found',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden access',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorResponseDto,
+  })
+  @ApiProduces(
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'video/mp4',
+    'application/octet-stream',
+  )
+  async getMediaByDirectFilename(
+    @Param('filename') filename: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      // This route conflicts with getMedia by ID, so we first check if this looks like a UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
+      // If it looks like an ID without extension, pass to the getMedia handler
+      if (uuidRegex.test(filename) && !filename.includes('.')) {
+        return this.getMedia(filename, res);
+      }
+      
+      // Otherwise, look for a file with this filename
+      // Try to find the media by filename in s3Key
+      const media = await prisma.media.findFirst({
+        where: {
+          s3Key: {
+            endsWith: `/${filename}`,
+          },
+        },
+      });
+
+      // If not found, try to find media where filename is the complete s3Key
+      if (!media) {
+        const mediaByExactKey = await prisma.media.findFirst({
+          where: {
+            s3Key: filename,
+          },
+        });
+
+        if (!mediaByExactKey) {
+          throw new NotFoundException(`Media with filename ${filename} not found`);
+        }
+
+        return this.serveMediaFile(mediaByExactKey.s3Key, mediaByExactKey, res);
+      }
+
+      return this.serveMediaFile(media.s3Key, media, res);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error;
+      }
+      Logger.error(
+        `Error in getMediaByDirectFilename: ${error.message}`,
+        error.stack,
+        'MediaController',
+      );
+      throw new InternalServerErrorException(
+        'An error occurred while retrieving the media',
+      );
+    }
+  }
+
+  // Helper method to serve media files
+  private async serveMediaFile(
+    s3Key: string,
+    media: { mimeType?: string },
+    res: Response,
+  ) {
+    try {
+      const { Body, ContentType } = await this.s3Service.getFile(s3Key);
+
+      res.set({
+        'Content-Type': ContentType || media?.mimeType || 'application/octet-stream',
+        'Content-Disposition': `inline; filename="${s3Key.split('/').pop()}"`,
+        'Cache-Control': 'max-age=86400', // Cache for 24 hours
+      });
+
+      return new StreamableFile(Body as Readable);
+    } catch (error) {
+      Logger.error(
+        `Error retrieving file from S3 with key ${s3Key}: ${error.message}`,
+        error.stack,
+        'MediaController',
+      );
+      throw new NotFoundException('Media file not found in storage');
+    }
+  }
 }

@@ -10,6 +10,7 @@ jest.mock('../db/prisma', () => ({
   default: {
     media: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
     },
   },
 }));
@@ -108,6 +109,151 @@ describe('MediaController', () => {
 
       await expect(
         controller.getMedia('test-id', mockResponse as any),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getMediaByDirectFilename', () => {
+    beforeEach(() => {
+      // Make sure findFirst and findUnique are mocked
+      (prisma.media as any).findFirst = jest.fn();
+      (prisma.media as any).findUnique = jest.fn();
+    });
+
+    it('should return a streamable file when media is found by filename with extension', async () => {
+      const mockFilename = 'ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg';
+      const mockMedia = {
+        id: 'test-media-id',
+        s3Key: 'uploads/ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg',
+        mimeType: 'image/jpeg',
+        postId: 'post-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockBody = Readable.from(['test data']);
+      const mockGetObjectResult = {
+        Body: mockBody,
+        ContentType: 'image/jpeg',
+      };
+
+      (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(mockMedia);
+      mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
+
+      const result = await controller.getMediaByDirectFilename(
+        mockFilename,
+        mockResponse as any,
+      );
+
+      expect(prisma.media.findFirst).toHaveBeenCalledWith({
+        where: {
+          s3Key: {
+            endsWith: `/${mockFilename}`,
+          },
+        },
+      });
+      expect(mockS3Service.getFile).toHaveBeenCalledWith(mockMedia.s3Key);
+      expect(mockResponse.set).toHaveBeenCalledWith({
+        'Content-Type': 'image/jpeg',
+        'Content-Disposition': `inline; filename="ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg"`,
+        'Cache-Control': 'max-age=86400',
+      });
+      expect(result.getStream()).toBe(mockBody);
+    });
+
+    it('should fall back to getMedia when the filename looks like a UUID without extension', async () => {
+      const mockId = 'ad4d8d1a-910e-43af-9287-2dc3a8a05d61';
+      const mockMedia = {
+        id: mockId,
+        s3Key: 'uploads/ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg',
+        mimeType: 'image/jpeg',
+        postId: 'post-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockBody = Readable.from(['test data']);
+      const mockGetObjectResult = {
+        Body: mockBody,
+        ContentType: 'image/jpeg',
+      };
+
+      (prisma.media.findUnique as jest.Mock).mockResolvedValueOnce(mockMedia);
+      mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
+
+      const result = await controller.getMediaByDirectFilename(
+        mockId,
+        mockResponse as any,
+      );
+
+      expect(prisma.media.findUnique).toHaveBeenCalledWith({
+        where: { id: mockId },
+      });
+      expect(mockS3Service.getFile).toHaveBeenCalledWith(mockMedia.s3Key);
+      expect(mockResponse.set).toHaveBeenCalledWith({
+        'Content-Type': 'image/jpeg',
+        'Content-Disposition': `inline; filename="ad4d8d1a-910e-43af-9287-2dc3a8a05d61.jpg"`,
+        'Cache-Control': 'max-age=86400',
+      });
+      expect(result.getStream()).toBe(mockBody);
+    });
+
+    it('should find media by exact s3Key when not found by endsWith', async () => {
+      const mockFilename = 'direct-image.jpg';
+      const mockMedia = {
+        id: 'test-media-id',
+        s3Key: 'direct-image.jpg',
+        mimeType: 'image/jpeg',
+        postId: 'post-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockBody = Readable.from(['test data']);
+      const mockGetObjectResult = {
+        Body: mockBody,
+        ContentType: 'image/jpeg',
+      };
+
+      // First query (by endsWith) returns null
+      (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
+      // Second query (by exact match) returns the media
+      (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(mockMedia);
+      mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
+
+      const result = await controller.getMediaByDirectFilename(
+        mockFilename,
+        mockResponse as any,
+      );
+
+      // Verify first call to findFirst (endsWith)
+      expect(prisma.media.findFirst).toHaveBeenNthCalledWith(1, {
+        where: {
+          s3Key: {
+            endsWith: `/${mockFilename}`,
+          },
+        },
+      });
+
+      // Verify second call to findFirst (exact match)
+      expect(prisma.media.findFirst).toHaveBeenNthCalledWith(2, {
+        where: {
+          s3Key: mockFilename,
+        },
+      });
+
+      expect(mockS3Service.getFile).toHaveBeenCalledWith(mockMedia.s3Key);
+      expect(result.getStream()).toBe(mockBody);
+    });
+
+    it('should throw NotFoundException when media is not found by filename', async () => {
+      const mockFilename = 'non-existent-image.jpg';
+      // Both queries return null
+      (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
+      (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
+
+      await expect(
+        controller.getMediaByDirectFilename(mockFilename, mockResponse as any),
       ).rejects.toThrow(NotFoundException);
     });
   });
