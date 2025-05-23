@@ -41,7 +41,11 @@ export class AuthController {
       }
       throw new BadRequestException('User creation failed');
     }
-    return this.authService.respondSuccess(res, userResult.id);
+    return this.authService.respondSuccess(
+      res,
+      userResult.id,
+      userResult.username,
+    );
   }
 
   @Post('login')
@@ -64,6 +68,6 @@ export class AuthController {
       throw new UnauthorizedException(unauthorizedMessage);
     }
 
-    return this.authService.respondSuccess(res, user.id);
+    return this.authService.respondSuccess(res, user.id, user.username);
   }
 }
