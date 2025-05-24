@@ -40,7 +40,11 @@ export class PostController {
   private postService: PostService;
   private spaceService: SpaceService;
 
-  constructor(s3Service: S3Service, postService: PostService, spaceService: SpaceService) {
+  constructor(
+    s3Service: S3Service,
+    postService: PostService,
+    spaceService: SpaceService,
+  ) {
     this.s3service = s3Service;
     this.postService = postService;
     this.spaceService = spaceService;
@@ -72,11 +76,11 @@ export class PostController {
           items: { type: 'string' },
           example: ['sunset', 'beach'],
         },
-        spaceId: { 
-          type: 'string', 
+        spaceId: {
+          type: 'string',
           format: 'uuid',
           example: '550e8400-e29b-41d4-a716-446655440000',
-          description: 'Optional space ID to assign the post to'
+          description: 'Optional space ID to assign the post to',
         },
         media: {
           type: 'array',

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import prisma from '../db/prisma';
 import { CreateSpaceDto } from './dto/CreateSpaceDto';
@@ -7,7 +11,10 @@ import { SpaceDto } from './dto/SpaceDto';
 
 @Injectable()
 export class SpaceService {
-  async create(createSpaceDto: CreateSpaceDto, ownerId: string): Promise<SpaceDto> {
+  async create(
+    createSpaceDto: CreateSpaceDto,
+    ownerId: string,
+  ): Promise<SpaceDto> {
     const space = await prisma.space.create({
       data: {
         name: createSpaceDto.name,
@@ -48,7 +55,11 @@ export class SpaceService {
     return plainToInstance(SpaceDto, space);
   }
 
-  async update(id: string, updateSpaceDto: UpdateSpaceDto, userId: string): Promise<SpaceDto> {
+  async update(
+    id: string,
+    updateSpaceDto: UpdateSpaceDto,
+    userId: string,
+  ): Promise<SpaceDto> {
     const existingSpace = await prisma.space.findUnique({
       where: { id },
     });
@@ -58,14 +69,18 @@ export class SpaceService {
     }
 
     if (existingSpace.ownerId !== userId) {
-      throw new ForbiddenException('You do not have permission to update this space');
+      throw new ForbiddenException(
+        'You do not have permission to update this space',
+      );
     }
 
     const updatedSpace = await prisma.space.update({
       where: { id },
       data: {
         name: updateSpaceDto.name,
-        ...(updateSpaceDto.description !== undefined && { description: updateSpaceDto.description }),
+        ...(updateSpaceDto.description !== undefined && {
+          description: updateSpaceDto.description,
+        }),
       },
     });
 
@@ -82,7 +97,9 @@ export class SpaceService {
     }
 
     if (existingSpace.ownerId !== userId) {
-      throw new ForbiddenException('You do not have permission to delete this space');
+      throw new ForbiddenException(
+        'You do not have permission to delete this space',
+      );
     }
 
     await prisma.space.delete({
