@@ -38,7 +38,10 @@ describe('SpaceService', () => {
 
   describe('create', () => {
     it('should create a new space', async () => {
-      const createSpaceDto: CreateSpaceDto = { name: 'Test Space', description: 'Test description' };
+      const createSpaceDto: CreateSpaceDto = {
+        name: 'Test Space',
+        description: 'Test description',
+      };
       const ownerId = 'user-123';
       const mockSpace = {
         id: 'space-123',
@@ -156,7 +159,10 @@ describe('SpaceService', () => {
     it('should update a space when user owns it', async () => {
       const spaceId = 'space-123';
       const userId = 'user-123';
-      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space', description: 'Updated description' };
+      const updateSpaceDto: UpdateSpaceDto = {
+        name: 'Updated Space',
+        description: 'Updated description',
+      };
       const mockExistingSpace = {
         id: spaceId,
         name: 'Old Space',
@@ -172,16 +178,18 @@ describe('SpaceService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.space.findUnique as jest.Mock).mockResolvedValue(mockExistingSpace);
+      (prisma.space.findUnique as jest.Mock).mockResolvedValue(
+        mockExistingSpace,
+      );
       (prisma.space.update as jest.Mock).mockResolvedValue(mockUpdatedSpace);
 
       const result = await service.update(spaceId, updateSpaceDto, userId);
 
       expect(prisma.space.update).toHaveBeenCalledWith({
         where: { id: spaceId },
-        data: { 
+        data: {
           name: updateSpaceDto.name,
-          description: updateSpaceDto.description 
+          description: updateSpaceDto.description,
         },
       });
       expect(result.name).toBe(updateSpaceDto.name);
@@ -195,9 +203,9 @@ describe('SpaceService', () => {
 
       (prisma.space.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.update(spaceId, updateSpaceDto, userId)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update(spaceId, updateSpaceDto, userId),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException when user does not own the space', async () => {
@@ -215,9 +223,9 @@ describe('SpaceService', () => {
 
       (prisma.space.findUnique as jest.Mock).mockResolvedValue(mockSpace);
 
-      await expect(service.update(spaceId, updateSpaceDto, userId)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.update(spaceId, updateSpaceDto, userId),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 

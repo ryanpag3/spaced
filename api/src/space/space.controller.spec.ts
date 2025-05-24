@@ -36,7 +36,10 @@ describe('SpaceController', () => {
 
   describe('create', () => {
     it('should create a space', async () => {
-      const createSpaceDto: CreateSpaceDto = { name: 'Test Space', description: 'Test description' };
+      const createSpaceDto: CreateSpaceDto = {
+        name: 'Test Space',
+        description: 'Test description',
+      };
       const mockRequest = { user: { id: 'user-123' } } as AuthenticatedRequest;
       const mockResult = {
         id: 'space-123',
@@ -103,7 +106,10 @@ describe('SpaceController', () => {
   describe('update', () => {
     it('should update a space', async () => {
       const spaceId = 'space-123';
-      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space', description: 'Updated description' };
+      const updateSpaceDto: UpdateSpaceDto = {
+        name: 'Updated Space',
+        description: 'Updated description',
+      };
       const mockRequest = { user: { id: 'user-123' } } as AuthenticatedRequest;
       const mockResult = {
         id: spaceId,
@@ -116,9 +122,17 @@ describe('SpaceController', () => {
 
       jest.spyOn(service, 'update').mockResolvedValue(mockResult);
 
-      const result = await controller.update(spaceId, updateSpaceDto, mockRequest);
+      const result = await controller.update(
+        spaceId,
+        updateSpaceDto,
+        mockRequest,
+      );
 
-      expect(service.update).toHaveBeenCalledWith(spaceId, updateSpaceDto, 'user-123');
+      expect(service.update).toHaveBeenCalledWith(
+        spaceId,
+        updateSpaceDto,
+        'user-123',
+      );
       expect(result).toBe(mockResult);
     });
   });
