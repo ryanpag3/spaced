@@ -71,14 +71,14 @@ describe('PostService', () => {
 
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
-        where: { authorId: mockUserId },
+        where: { authorId: mockUserId, spaceId: null },
         take: 21, // default size (20) + 1
         orderBy: { createdAt: 'desc' },
         include: { media: true },
       });
 
       expect(prisma.post.count).toHaveBeenCalledWith({
-        where: { authorId: mockUserId },
+        where: { authorId: mockUserId, spaceId: null },
       });
 
       expect(result).toBeDefined();
@@ -118,7 +118,7 @@ describe('PostService', () => {
 
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
-        where: { authorId: mockUserId },
+        where: { authorId: mockUserId, spaceId: null },
         take: mockSize + 1,
         cursor: { id: mockCursor },
         skip: 1,
@@ -172,7 +172,7 @@ describe('PostService', () => {
 
       // Assert
       expect(prisma.post.findMany).toHaveBeenCalledWith({
-        where: { authorId: mockUserId },
+        where: { authorId: mockUserId, spaceId: null },
         take: mockSize + 1,
         orderBy: { createdAt: 'desc' },
         include: { media: true },
@@ -200,6 +200,58 @@ describe('PostService', () => {
       expect(result.posts).toHaveLength(0);
       expect(result.total).toBe(0);
       expect(result.nextPageToken).toBeUndefined();
+    });
+
+    it('should exclude posts assigned to spaces', async () => {
+      // Arrange
+      const mockPosts = [
+        {
+          id: 'post-id-1',
+          description: 'Personal post',
+          authorId: mockUserId,
+          spaceId: null, // Not assigned to a space
+          tags: ['personal'],
+          createdAt: new Date(),
+          media: [{ id: 'media-1', s3Key: 's3://bucket/media1.jpg' }],
+        },
+      ];
+
+      // This post should be excluded from the result since it has a spaceId
+      const mockPostWithSpaceId = {
+        id: 'post-id-2',
+        description: 'Space post',
+        authorId: mockUserId,
+        spaceId: 'space-123', // Assigned to a space
+        tags: ['space'],
+        createdAt: new Date(),
+        media: [{ id: 'media-2', s3Key: 's3://bucket/media2.jpg' }],
+      };
+
+      const mockCount = 1; // Only counting the post without spaceId
+
+      // Mock the database response to only return the post without spaceId
+      (prisma.post.findMany as jest.Mock).mockResolvedValue(mockPosts);
+      (prisma.post.count as jest.Mock).mockResolvedValue(mockCount);
+
+      // Act
+      const result = await service.getProfilePosts(mockUserId);
+
+      // Assert
+      expect(prisma.post.findMany).toHaveBeenCalledWith({
+        where: { authorId: mockUserId, spaceId: null },
+        take: 21, // default size (20) + 1
+        orderBy: { createdAt: 'desc' },
+        include: { media: true },
+      });
+
+      expect(prisma.post.count).toHaveBeenCalledWith({
+        where: { authorId: mockUserId, spaceId: null },
+      });
+
+      expect(result.posts).toHaveLength(1);
+      expect(result.posts[0].id).toBe('post-id-1');
+      expect(result.posts[0].spaceId).toBeNull();
+      expect(result.total).toBe(mockCount);
     });
 
     it('should handle error cases gracefully', async () => {

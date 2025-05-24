@@ -3,7 +3,7 @@ import Auth from '@/lib/auth';
 import { Image } from 'expo-image';
 import { Asset } from 'expo-media-library';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { 
   ActivityIndicator, 
   Dimensions, 
@@ -12,6 +12,7 @@ import {
   NativeScrollEvent, 
   NativeSyntheticEvent, 
   Platform, 
+  ScrollView,
   StyleSheet, 
   TouchableOpacity 
 } from 'react-native';
@@ -23,6 +24,14 @@ import { Text, View } from '@/components/Themed';
 import StyledTextInput from '@/components/StyledTextInput';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// Define Space interface
+interface Space {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+// Get screen dimensions
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Define styles outside component
@@ -132,6 +141,45 @@ const createStyles = (colors: ColorTheme) => StyleSheet.create({
     fontSize: 18,
     marginTop: 10,
     textAlign: 'center',
+  },
+  dropdownContainer: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  dropdownHeader: {
+    backgroundColor: '#f7f7f7',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownHeaderText: {
+    fontWeight: '600',
+  },
+  dropdownList: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ddd',
+  },
+  activeDropdownItem: {
+    backgroundColor: '#f0f0f0',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+  },
+  dropdownPlaceholder: {
+    color: '#999',
+  },
+  scrollContent: {
+    paddingBottom: 100,
   }
 });
 
@@ -146,7 +194,36 @@ export default function SubmitPostStep() {
   const [tags, setTags] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [isLoadingSpaces, setIsLoadingSpaces] = useState(false);
   const listRef = useRef<FlatList<Asset>>(null);
+
+  useEffect(() => {
+    // Fetch spaces owned by the user
+    const fetchSpaces = async () => {
+      try {
+        setIsLoadingSpaces(true);
+        const token = await Auth.getToken();
+        if (!token) return;
+        
+        const response = await SpacedApi.getSpaces(token);
+        if (!response.ok) {
+          throw new Error('Failed to fetch spaces');
+        }
+        
+        const spacesData = await response.json();
+        setSpaces(spacesData);
+      } catch (error) {
+        console.error('Error fetching spaces:', error);
+      } finally {
+        setIsLoadingSpaces(false);
+      }
+    };
+
+    fetchSpaces();
+  }, []);
 
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
@@ -170,6 +247,11 @@ export default function SubmitPostStep() {
         for (const tag of tagsArr) {
           formData.append('tags[]', tag);
         }
+      }
+
+      // Add space ID if a space is selected
+      if (selectedSpace) {
+        formData.append('spaceId', selectedSpace.id);
       }
 
       selectedAssets.forEach((asset) => {
@@ -201,6 +283,15 @@ export default function SubmitPostStep() {
       setIsLoading(false);
     }
   }
+
+  const toggleDropdown = () => {
+    setIsDropdownVisible(prev => !prev);
+  };
+
+  const handleSpaceSelect = (space: Space) => {
+    setSelectedSpace(space);
+    setIsDropdownVisible(false);
+  };
 
   // Styles are defined at the top of the file
 
@@ -291,6 +382,47 @@ export default function SubmitPostStep() {
             placeholder="Add tags, separated by commas"
           />
 
+          {/* Space Selection Dropdown */}
+          <Text style={styles.label}>Space (optional)</Text>
+          <View style={styles.dropdownContainer}>
+            <TouchableOpacity 
+              style={styles.dropdownHeader}
+              onPress={toggleDropdown}
+            >
+              <Text style={styles.dropdownHeaderText}>
+                {isLoadingSpaces 
+                  ? 'Loading spaces...' 
+                  : spaces.length === 0 
+                    ? 'No spaces available' 
+                    : selectedSpace 
+                      ? selectedSpace.name 
+                      : 'Select a space (optional)'}
+              </Text>
+              <MaterialIcons 
+                name={isDropdownVisible ? "arrow-drop-up" : "arrow-drop-down"} 
+                size={24} 
+                color="#333" 
+              />
+            </TouchableOpacity>
+
+            {isDropdownVisible && spaces.length > 0 && (
+              <ScrollView style={styles.dropdownList}>
+                {spaces.map((space) => (
+                  <TouchableOpacity
+                    key={space.id}
+                    style={[
+                      styles.dropdownItem,
+                      selectedSpace?.id === space.id && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleSpaceSelect(space)}
+                  >
+                    <Text style={styles.dropdownItemText}>{space.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+
           <TouchableOpacity 
             style={[
               styles.submitButton,
@@ -343,5 +475,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 10,
     textAlign: 'center',
-  }
+  },
+  dropdownContainer: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  dropdownHeader: {
+    backgroundColor: '#f7f7f7',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  dropdownHeaderText: {
+    fontWeight: '600',
+  },
+  dropdownList: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+  },
+
 });

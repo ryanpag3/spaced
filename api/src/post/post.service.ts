@@ -14,6 +14,7 @@ export class PostService {
     const posts = await prisma.post.findMany({
       where: {
         authorId: userId,
+        spaceId: null, // Only include posts that are not assigned to a space
       },
       take: size + 1, // fetch one extra to determine if there are more results
       ...(cursor && {
@@ -34,6 +35,7 @@ export class PostService {
     const totalCount = await prisma.post.count({
       where: {
         authorId: userId,
+        spaceId: null, // Only count posts that are not assigned to a space
       },
     });
 
