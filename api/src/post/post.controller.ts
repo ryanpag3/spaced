@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiQuery,
@@ -26,19 +27,27 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedRequest } from '../common/types/request.type';
 import prisma from '../db/prisma';
 import { S3Service } from '../s3/s3.service';
+import { SpaceService } from '../space/space.service';
 import CreatePostDto from './dto/CreatePostDto';
 import { ListPostDto } from './dto/ListPostResponseDto';
 import { PostService } from './post.service';
 
 @ApiTags('posts')
+@ApiBearerAuth()
 @Controller('posts')
 export class PostController {
   private s3service: S3Service;
   private postService: PostService;
+  private spaceService: SpaceService;
 
-  constructor(s3Service: S3Service, postService: PostService) {
+  constructor(
+    s3Service: S3Service,
+    postService: PostService,
+    spaceService: SpaceService,
+  ) {
     this.s3service = s3Service;
     this.postService = postService;
+    this.spaceService = spaceService;
   }
 
   @Post()
@@ -66,6 +75,12 @@ export class PostController {
           type: 'array',
           items: { type: 'string' },
           example: ['sunset', 'beach'],
+        },
+        spaceId: {
+          type: 'string',
+          format: 'uuid',
+          example: '550e8400-e29b-41d4-a716-446655440000',
+          description: 'Optional space ID to assign the post to',
         },
         media: {
           type: 'array',
@@ -102,6 +117,11 @@ export class PostController {
     let uploadedMedia = [];
     const userId = request.user.id;
     try {
+      // Validate spaceId if provided
+      if (body.spaceId) {
+        await this.spaceService.findOne(body.spaceId, userId);
+      }
+
       uploadedMedia = await Promise.all(
         files.map(async (file) => {
           const ext = extname(file.originalname);
@@ -115,6 +135,7 @@ export class PostController {
           description: body.description,
           tags: body.tags,
           authorId: userId,
+          spaceId: body.spaceId,
           media: {
             create: uploadedMedia.map((m) => ({
               s3Key: m.key,

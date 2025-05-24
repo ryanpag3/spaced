@@ -49,6 +49,7 @@ export class PostService {
       const mediaUris = post.media.map((media) => media.s3Key);
       const dto = plainToInstance(PostDto, {
         ...post,
+        spaceId: post.spaceId,
         mediaIds,
         mediaUris,
       });

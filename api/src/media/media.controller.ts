@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiResponse,
   ApiProduces,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { S3Service } from '../s3/s3.service';
 import prisma from '../db/prisma';
@@ -24,6 +25,7 @@ import { MediaFileResponseDto, ErrorResponseDto } from './dto';
 import Public from '../common/decorators/public.decorator';
 
 @ApiTags('media')
+@ApiBearerAuth()
 @Controller('media')
 export class MediaController {
   constructor(private readonly s3Service: S3Service) {}

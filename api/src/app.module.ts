@@ -8,6 +8,7 @@ import { S3Module } from './s3/s3.module';
 import { S3Service } from './s3/s3.service';
 import { UsersModule } from './users/users.module';
 import { MediaModule } from './media/media.module';
+import { SpaceModule } from './space/space.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MediaModule } from './media/media.module';
     AuthModule,
     PostModule,
     MediaModule,
+    SpaceModule,
   ],
   controllers: [AppController],
   providers: [AppService, S3Service],

@@ -16,6 +16,11 @@ export class PostDto {
   authorId: string;
 
   @Expose()
+  @IsUUID()
+  @IsOptional()
+  spaceId?: string;
+
+  @Expose()
   @IsArray()
   @IsString({ each: true })
   tags: string[];
