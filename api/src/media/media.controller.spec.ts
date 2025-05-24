@@ -38,6 +38,9 @@ jest.mock('@nestjs/swagger', () => ({
   ApiProperty: () => {
     return (target: any) => target;
   },
+  ApiBearerAuth: () => {
+    return (target: any) => target;
+  }
 }));
 
 import { Test, TestingModule } from '@nestjs/testing';
