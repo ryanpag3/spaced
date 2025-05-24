@@ -1,12 +1,6 @@
-/**
- * Base64 utilities for React Native
- */
 
-/**
- * Decodes a base64 string to a utf-8 string
- * @param input Base64 encoded string
- * @returns Decoded string
- */
+
+
 export function atob(input: string): string {
   const keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   
@@ -15,7 +9,6 @@ export function atob(input: string): string {
   let enc1, enc2, enc3, enc4;
   let i = 0;
   
-  // Remove all characters that are not A-Z, a-z, 0-9, +, /, or =
   input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
   
   do {
@@ -41,11 +34,7 @@ export function atob(input: string): string {
   return output.join('');
 }
 
-/**
- * Encodes a utf-8 string to a base64 string
- * @param input String to encode
- * @returns Base64 encoded string
- */
+
 export function btoa(input: string): string {
   const keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   

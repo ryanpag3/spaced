@@ -7,24 +7,16 @@ interface ColorTheme {
   backgroundTertiary: string;
   surface: string;
   surfaceSecondary: string;
-  
-  // Interactive elements
   tint: string;
   tintSecondary: string;
-  
-  // Navigation & tabs
   tabIconDefault: string;
   tabIconSelected: string;
-  
-  // Buttons
   buttonPrimary: string;
   buttonSecondary: string;
   buttonOutline: string;
   buttonText: string;
   buttonTextSecondary: string;
   buttonDisabled: string;
-  
-  // Form inputs
   inputBackground: string;
   inputBorder: string;
   inputBorderFocused: string;

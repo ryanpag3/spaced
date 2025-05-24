@@ -4,7 +4,6 @@ import { SpaceService } from './space.service';
 import { CreateSpaceDto } from './dto/CreateSpaceDto';
 import { UpdateSpaceDto } from './dto/UpdateSpaceDto';
 
-// Mock Prisma
 jest.mock('../db/prisma', () => ({
   __esModule: true,
   default: {

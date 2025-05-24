@@ -66,7 +66,6 @@ export class MediaController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      // Find the media in the database
       const media = await prisma.media.findUnique({
         where: { id },
       });
@@ -75,18 +74,15 @@ export class MediaController {
         throw new NotFoundException(`Media with ID ${id} not found`);
       }
 
-      // Get the media from S3
       try {
         const { Body, ContentType } = await this.s3Service.getFile(media.s3Key);
 
-        // Set appropriate headers
         res.set({
           'Content-Type': ContentType || media.mimeType,
           'Content-Disposition': `inline; filename="${media.s3Key.split('/').pop()}"`,
-          'Cache-Control': 'max-age=86400', // Cache for 24 hours
+          'Cache-Control': 'max-age=86400',
         });
 
-        // Return the file as a streamable response
         return new StreamableFile(Body as Readable);
       } catch (error) {
         Logger.error(
@@ -159,7 +155,7 @@ export class MediaController {
           'Content-Type':
             ContentType || media?.mimeType || 'application/octet-stream',
           'Content-Disposition': `inline; filename="${key.split('/').pop()}"`,
-          'Cache-Control': 'max-age=86400', // Cache for 24 hours
+          'Cache-Control': 'max-age=86400'
         });
 
         return new StreamableFile(Body as Readable);
@@ -248,7 +244,6 @@ export class MediaController {
         },
       });
 
-      // If not found, try to find media where filename is the complete s3Key
       if (!media) {
         const mediaByExactKey = await prisma.media.findFirst({
           where: {
@@ -284,7 +279,6 @@ export class MediaController {
     }
   }
 
-  // Helper method to serve media files
   private async serveMediaFile(
     s3Key: string,
     media: { mimeType?: string },
@@ -297,7 +291,7 @@ export class MediaController {
         'Content-Type':
           ContentType || media?.mimeType || 'application/octet-stream',
         'Content-Disposition': `inline; filename="${s3Key.split('/').pop()}"`,
-        'Cache-Control': 'max-age=86400', // Cache for 24 hours
+        'Cache-Control': 'max-age=86400'
       });
 
       return new StreamableFile(Body as Readable);

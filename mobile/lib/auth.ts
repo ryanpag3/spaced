@@ -53,12 +53,7 @@ export default class Auth {
                 username,
                 email,
                 password
-                // encryptedMasterKey: fromByteArray(keyMaterial.masterKeyMaterial.encrypted),
-                // kekSalt: fromByteArray(keyMaterial.kekMaterial.salt),
-                // masterKeyNonce: fromByteArray(keyMaterial.masterKeyMaterial.nonce),
-                // encryptedPrivateKey: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.encryptedKey),
-                // privateKeyNonce: fromByteArray(keyMaterial.keyPairMaterial.encryptedPrivateKey.nonce),
-                // publicKey: fromByteArray(keyMaterial.keyPairMaterial.keyPair.publicKey)
+
             }
         );
         if (result.status !== 201) {
@@ -105,7 +100,6 @@ export default class Auth {
     }
 
     static async login(email: string, password: string) {
-        // perform initial login
         const response = await SpacedApi.login(email, password);
         const data = await response.json();
 
@@ -115,11 +109,8 @@ export default class Auth {
 
         await SecureStore.setItemAsync(this.AUTH_TOKEN, data.token);
 
-        // get keys from backend
         const keysResponse = await SpacedApi.getKeys(data.token);
         const encryptedKeyMaterial: GetKeysData = await keysResponse.json();
-
-        // convert base64 strings to unsigned arrays
         const encryptedMasterKey = this.base64ToUint8Array(encryptedKeyMaterial.data.encryptedMasterKey);
         const kekSalt = this.base64ToUint8Array(encryptedKeyMaterial.data.kekSalt);
         const masterKeyNonce = this.base64ToUint8Array(encryptedKeyMaterial.data.masterKeyNonce);
@@ -127,7 +118,6 @@ export default class Auth {
         const privateKeyNonce = this.base64ToUint8Array(encryptedKeyMaterial.data.privateKeyNonce);
         const publicKey = this.base64ToUint8Array(encryptedKeyMaterial.data.publicKey);
 
-        // re-generate key encryption key using users password
         const kekMaterial = Crypto.generateKek(password, kekSalt);
 
         const masterKey = Crypto.decryptKey(encryptedMasterKey, masterKeyNonce, kekMaterial.kek);

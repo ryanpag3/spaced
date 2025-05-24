@@ -1,4 +1,3 @@
-// Mock NestJS decorators
 jest.mock('@nestjs/common', () => {
   const original = jest.requireActual('@nestjs/common');
   return {
@@ -10,7 +9,6 @@ jest.mock('@nestjs/common', () => {
   };
 });
 
-// Mock the Public decorator
 jest.mock('../common/decorators/public.decorator', () => ({
   __esModule: true,
   default: () => {
@@ -18,7 +16,6 @@ jest.mock('../common/decorators/public.decorator', () => ({
   },
 }));
 
-// Mock Swagger decorators
 jest.mock('@nestjs/swagger', () => ({
   ApiTags: () => {
     return (target: any) => target;
@@ -49,7 +46,6 @@ import { S3Service } from '../s3/s3.service';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Readable } from 'stream';
 
-// Mock prisma
 jest.mock('../db/prisma', () => ({
   __esModule: true,
   default: {
@@ -160,7 +156,6 @@ describe('MediaController', () => {
 
   describe('getMediaByPath', () => {
     beforeEach(() => {
-      // Make sure findFirst and findUnique are mocked
       (prisma.media as any).findFirst = jest.fn();
       (prisma.media as any).findUnique = jest.fn();
     });
@@ -221,14 +216,12 @@ describe('MediaController', () => {
       };
 
       const mockBody = Readable.from(['test data']);
-      const mockGetObjectResult = {
+      const      mockGetObjectResult = {
         Body: mockBody,
         ContentType: 'image/jpeg',
       };
 
-      // First query (by endsWith) returns null
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
-      // Second query (by exact match) returns the media
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(mockMedia);
       mockS3Service.getFile.mockResolvedValueOnce(mockGetObjectResult);
 
@@ -238,7 +231,6 @@ describe('MediaController', () => {
         mockResponse as any,
       );
 
-      // Verify first call to findFirst (endsWith)
       expect(prisma.media.findFirst).toHaveBeenNthCalledWith(1, {
         where: {
           s3Key: {
@@ -247,7 +239,6 @@ describe('MediaController', () => {
         },
       });
 
-      // Verify second call to findFirst (exact match)
       expect(prisma.media.findFirst).toHaveBeenNthCalledWith(2, {
         where: {
           s3Key: mockFilename,
@@ -261,7 +252,6 @@ describe('MediaController', () => {
     it('should throw NotFoundException when media is not found by path', async () => {
       const mockUserId = 'user-123';
       const mockFilename = 'non-existent-image.jpg';
-      // Both queries return null
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
       (prisma.media.findFirst as jest.Mock).mockResolvedValueOnce(null);
 

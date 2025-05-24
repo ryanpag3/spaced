@@ -23,18 +23,13 @@ import { ColorTheme } from '@/constants/Colors';
 import { Text, View } from '@/components/Themed';
 import StyledTextInput from '@/components/StyledTextInput';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// Define Space interface
 interface Space {
   id: string;
   name: string;
   description?: string;
 }
 
-// Get screen dimensions
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Define styles outside component
 const createStyles = (colors: ColorTheme) => StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -201,7 +196,6 @@ export default function SubmitPostStep() {
   const listRef = useRef<FlatList<Asset>>(null);
 
   useEffect(() => {
-    // Fetch spaces owned by the user
     const fetchSpaces = async () => {
       try {
         setIsLoadingSpaces(true);
@@ -249,7 +243,6 @@ export default function SubmitPostStep() {
         }
       }
 
-      // Add space ID if a space is selected
       if (selectedSpace) {
         formData.append('spaceId', selectedSpace.id);
       }
@@ -266,20 +259,16 @@ export default function SubmitPostStep() {
 
       await SpacedApi.createPost(token as string, formData);
       
-      // Add artificial delay if operation was too fast
       const elapsedTime = Date.now() - startTime;
       if (elapsedTime < 1000) {
         await new Promise(resolve => setTimeout(resolve, 1000 - elapsedTime));
       }
       
       setIsSuccess(true);
-      
-      // Navigate home after showing success for a moment
       setTimeout(() => {
         router.replace("/(app)/(tabs)/home");
       }, 1500);
     } catch (e) {
-      // Error handling remains but without logging
       setIsLoading(false);
     }
   }
@@ -292,8 +281,6 @@ export default function SubmitPostStep() {
     setSelectedSpace(space);
     setIsDropdownVisible(false);
   };
-
-  // Styles are defined at the top of the file
 
   if (isLoading || isSuccess) {
     return (
@@ -320,7 +307,6 @@ export default function SubmitPostStep() {
         behavior={Platform.select({ ios: 'padding', android: undefined })}
         style={styles.container}
       >
-        {/* Carousel */}
         <View style={styles.carouselContainer}>
           <FlatList
             ref={listRef}
@@ -339,14 +325,12 @@ export default function SubmitPostStep() {
             )}
           />
 
-          {/* Media Type Indicator */}
           {selectedAssets[currentIndex]?.mediaType === 'video' && (
             <View style={styles.videoIndicator}>
               <MaterialIcons name="videocam" size={24} color="white" />
             </View>
           )}
 
-          {/* Dot Indicator */}
           {selectedAssets.length > 1 && (
             <View style={styles.indicatorContainer}>
               {selectedAssets.map((_, idx) => (
@@ -362,7 +346,6 @@ export default function SubmitPostStep() {
           )}
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <Text style={styles.label}>Description</Text>
           <StyledTextInput
@@ -382,7 +365,6 @@ export default function SubmitPostStep() {
             placeholder="Add tags, separated by commas"
           />
 
-          {/* Space Selection Dropdown */}
           <Text style={styles.label}>Space (optional)</Text>
           <View style={styles.dropdownContainer}>
             <TouchableOpacity 
