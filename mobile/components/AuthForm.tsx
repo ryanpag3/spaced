@@ -44,12 +44,11 @@ export default function AuthForm({
         <Text style={styles.title}>
           {submitLabel === 'Login' ? 'Welcome back' : 'Create account'}
         </Text>
-        <Text style={styles.subtitle}>
-          {submitLabel === 'Login' 
-            ? 'Sign in to your account to continue' 
-            : 'Sign up to get started with Spaced'
-          }
-        </Text>
+        {submitLabel !== 'Login' && (
+          <Text style={styles.subtitle}>
+            Sign up to get started with Spaced
+          </Text>
+        )}
       </View>
       
       <Form style={styles.form}>

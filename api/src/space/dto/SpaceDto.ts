@@ -18,6 +18,14 @@ export class SpaceDto {
 
   @Expose()
   @ApiProperty({
+    example: 'Photos from my summer vacation in Italy',
+    description: 'An optional description of the space.',
+    required: false,
+  })
+  description?: string;
+
+  @Expose()
+  @ApiProperty({
     example: '2023-05-23T10:30:00.000Z',
     description: 'The creation timestamp of the space.',
   })

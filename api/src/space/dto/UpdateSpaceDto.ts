@@ -11,4 +11,14 @@ export class UpdateSpaceDto {
     maxLength: 100,
   })
   name: string;
+
+  @IsString()
+  @MaxLength(500)
+  @ApiProperty({
+    example: 'Updated description for my vacation photos',
+    description: 'An optional description of the space.',
+    maxLength: 500,
+    required: false,
+  })
+  description?: string;
 }

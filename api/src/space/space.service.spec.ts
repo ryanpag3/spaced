@@ -38,11 +38,12 @@ describe('SpaceService', () => {
 
   describe('create', () => {
     it('should create a new space', async () => {
-      const createSpaceDto: CreateSpaceDto = { name: 'Test Space' };
+      const createSpaceDto: CreateSpaceDto = { name: 'Test Space', description: 'Test description' };
       const ownerId = 'user-123';
       const mockSpace = {
         id: 'space-123',
         name: 'Test Space',
+        description: 'Test description',
         ownerId: 'user-123',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -55,10 +56,12 @@ describe('SpaceService', () => {
       expect(prisma.space.create).toHaveBeenCalledWith({
         data: {
           name: createSpaceDto.name,
+          description: createSpaceDto.description,
           ownerId,
         },
       });
       expect(result.name).toBe(mockSpace.name);
+      expect(result.description).toBe(mockSpace.description);
       expect(result.ownerId).toBe(ownerId);
     });
   });
@@ -153,10 +156,11 @@ describe('SpaceService', () => {
     it('should update a space when user owns it', async () => {
       const spaceId = 'space-123';
       const userId = 'user-123';
-      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space' };
+      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space', description: 'Updated description' };
       const mockExistingSpace = {
         id: spaceId,
         name: 'Old Space',
+        description: 'Old description',
         ownerId: userId,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -164,6 +168,7 @@ describe('SpaceService', () => {
       const mockUpdatedSpace = {
         ...mockExistingSpace,
         name: updateSpaceDto.name,
+        description: updateSpaceDto.description,
         updatedAt: new Date(),
       };
 
@@ -174,9 +179,13 @@ describe('SpaceService', () => {
 
       expect(prisma.space.update).toHaveBeenCalledWith({
         where: { id: spaceId },
-        data: { name: updateSpaceDto.name },
+        data: { 
+          name: updateSpaceDto.name,
+          description: updateSpaceDto.description 
+        },
       });
       expect(result.name).toBe(updateSpaceDto.name);
+      expect(result.description).toBe(updateSpaceDto.description);
     });
 
     it('should throw NotFoundException when space does not exist', async () => {

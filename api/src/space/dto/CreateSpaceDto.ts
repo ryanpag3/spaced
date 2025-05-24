@@ -11,4 +11,14 @@ export class CreateSpaceDto {
     maxLength: 100,
   })
   name: string;
+
+  @IsString()
+  @MaxLength(500)
+  @ApiProperty({
+    example: 'Photos from my summer vacation in Italy',
+    description: 'An optional description of the space.',
+    maxLength: 500,
+    required: false,
+  })
+  description?: string;
 }

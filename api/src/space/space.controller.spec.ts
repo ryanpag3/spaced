@@ -36,11 +36,12 @@ describe('SpaceController', () => {
 
   describe('create', () => {
     it('should create a space', async () => {
-      const createSpaceDto: CreateSpaceDto = { name: 'Test Space' };
+      const createSpaceDto: CreateSpaceDto = { name: 'Test Space', description: 'Test description' };
       const mockRequest = { user: { id: 'user-123' } } as AuthenticatedRequest;
       const mockResult = {
         id: 'space-123',
         name: 'Test Space',
+        description: 'Test description',
         ownerId: 'user-123',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -84,6 +85,7 @@ describe('SpaceController', () => {
       const mockSpace = {
         id: spaceId,
         name: 'Test Space',
+        description: 'Test description',
         ownerId: 'user-123',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -101,11 +103,12 @@ describe('SpaceController', () => {
   describe('update', () => {
     it('should update a space', async () => {
       const spaceId = 'space-123';
-      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space' };
+      const updateSpaceDto: UpdateSpaceDto = { name: 'Updated Space', description: 'Updated description' };
       const mockRequest = { user: { id: 'user-123' } } as AuthenticatedRequest;
       const mockResult = {
         id: spaceId,
         name: 'Updated Space',
+        description: 'Updated description',
         ownerId: 'user-123',
         createdAt: new Date(),
         updatedAt: new Date(),

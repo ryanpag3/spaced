@@ -11,6 +11,7 @@ export class SpaceService {
     const space = await prisma.space.create({
       data: {
         name: createSpaceDto.name,
+        description: createSpaceDto.description,
         ownerId,
       },
     });
@@ -64,6 +65,7 @@ export class SpaceService {
       where: { id },
       data: {
         name: updateSpaceDto.name,
+        ...(updateSpaceDto.description !== undefined && { description: updateSpaceDto.description }),
       },
     });
 

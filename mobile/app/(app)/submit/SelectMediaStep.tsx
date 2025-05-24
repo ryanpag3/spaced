@@ -3,11 +3,16 @@ import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { Asset } from 'expo-media-library';
 import { useNavigation, useRouter } from 'expo-router';
 import { useCallback, useLayoutEffect, useState } from 'react';
-import { Alert, Button, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '@/components/Themed';
+import { useTheme } from '@/components/ThemeProvider';
+import { useThemedStyles } from '@/components/useThemedStyles';
+import { ColorTheme } from '@/constants/Colors';
 
 export default function SelectMediaStep() {
   const navigation = useNavigation();
   const router = useRouter();
+  const { colors } = useTheme();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -44,26 +49,67 @@ export default function SelectMediaStep() {
       headerBackTitle: 'Back',
       title: 'Select Media',
       headerRight: () => (
-        <Button 
-          title="Next" 
-          onPress={onNextPushed} 
+        <TouchableOpacity 
+          style={[
+            { 
+              paddingVertical: 8, 
+              paddingHorizontal: 12,
+              borderRadius: 8,
+              opacity: isNavigating || selectedAssets.length === 0 ? 0.5 : 1
+            },
+          ]}
+          onPress={onNextPushed}
           disabled={isNavigating || selectedAssets.length === 0}
-        />
+        >
+          <Text 
+            style={{ 
+              color: colors.tint, 
+              fontWeight: '600', 
+              fontSize: 16 
+            }}
+          >
+            Next
+          </Text>
+        </TouchableOpacity>
       )
     } satisfies NativeStackNavigationOptions);
-  }, [navigation, onNextPushed, isNavigating, selectedAssets.length]);
+  }, [navigation, onNextPushed, isNavigating, selectedAssets.length, colors]);
+
+  const styles = useThemedStyles(createStyles);
 
   return (
     <View style={styles.container}>
       <GalleryGrid 
         onSelectedAssetsChanged={(selected) => setSelectedAssets([...selected])} 
       />
+      <View style={styles.selectionInfo}>
+        <Text style={styles.selectionText}>
+          {selectedAssets.length} {selectedAssets.length === 1 ? 'item' : 'items'} selected
+        </Text>
+      </View>
     </View>
-  )
+  );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorTheme) => StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  selectionInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    alignItems: 'center',
+  },
+  selectionText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
   }
 });

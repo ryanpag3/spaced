@@ -12,6 +12,11 @@ export type SignUpBody = {
     // publicKey: string;
 }
 
+export type CreateSpaceBody = {
+    name: string;
+    description?: string;
+}
+
 export default class SpacedApi {
     static async signUp(body: SignUpBody) {
         return fetch(`${Config.API_URL}/auth/signup`, {
@@ -79,5 +84,26 @@ export default class SpacedApi {
             console.error('Network error fetching posts:', error);
             throw error;
         }
+    }
+    
+    static async createSpace(token: string, body: CreateSpaceBody) {
+        return fetch(`${Config.API_URL}/spaces`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body),
+        });
+    }
+    
+    static async getSpaces(token: string) {
+        return fetch(`${Config.API_URL}/spaces`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
     }
 }
